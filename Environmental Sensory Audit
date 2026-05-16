@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Environmental Sensory Audit - Professional Edition</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #a0a795;
+            padding: 40px;
+            color: white;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.05) 100%);
+            pointer-events: none;
+        }
+
+        .confidential-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.15);
+            padding: 4px 12px;
+            border-radius: 2px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-bar-container {
+            background: #f8f9fa;
+            padding: 20px 40px;
+            display: none;
+        }
+
+        .progress-bar-container.active { display: block; }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #a0a795;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .content { padding: 40px; }
+
+        .step { display: none; }
+        .step.active { display: block; }
+
+        .info-box {
+            background: #f4f5f3;
+            border-left: 4px solid #a0a795;
+            border-radius: 2px;
+            padding: 20px;
+            margin-bottom: 30px;
+            color: #3d3d3d;
+        }
+
+        .info-box h3 {
+            margin: 0 0 10px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #787d74;
+        }
+
+        .info-box p { margin: 0; line-height: 1.6; }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 30px;
+            color: #856404;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        ul {
+            line-height: 2;
+            color: #495057;
+            padding-left: 20px;
+            margin: 15px 0;
+        }
+
+        h2 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 15px;
+        }
+
+        .form-group { margin-bottom: 20px; }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        textarea { resize: vertical; min-height: 80px; }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #a0a795;
+        }
+
+        .help-text {
+            font-size: 13px;
+            color: #6c757d;
+            margin-top: 6px;
+            font-style: italic;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover:not(:disabled) { transform: translateY(-2px); }
+        button:disabled { cursor: not-allowed; opacity: 0.6; }
+
+        .btn-primary { background: #a0a795; color: white; flex: 2; }
+        .btn-primary:hover:not(:disabled) { background: #8a8f80; }
+        .btn-secondary { background: #6c757d; color: white; flex: 1; }
+        .btn-success { background: #8a9e7e; color: white; flex: 2; }
+        .btn-success:hover:not(:disabled) { background: #7a8e6e; }
+        .btn-export { background: #17a2b8; color: white; flex: 1; }
+        .btn-new { background: #28a745; color: white; flex: 1; }
+
+        /* Domain section styling */
+        .domain-section {
+            margin-bottom: 40px;
+        }
+
+        .domain-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .domain-icon {
+            font-size: 28px;
+            line-height: 1;
+        }
+
+        .domain-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .domain-subtitle {
+            font-size: 13px;
+            color: rgba(255,255,255,0.85);
+            margin-top: 2px;
+        }
+
+        /* Domain colours - soft pastels matching brand */
+        .domain-visual    { background: #8fa3a0; }
+        .domain-auditory  { background: #9e9e8a; }
+        .domain-tactile   { background: #9ea08a; }
+        .domain-olfactory { background: #8a9e8f; }
+        .domain-vestibular{ background: #8a8fa0; }
+        .domain-social    { background: #a08a9e; }
+
+        .audit-item {
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            transition: all 0.3s;
+        }
+
+        .audit-item.answered {
+            background: #f8f9fa;
+            border-color: #a0a795;
+        }
+
+        .audit-item[data-domain="visual"]    { border-left: 4px solid #8fa3a0; }
+        .audit-item[data-domain="auditory"]  { border-left: 4px solid #9e9e8a; }
+        .audit-item[data-domain="tactile"]   { border-left: 4px solid #9ea08a; }
+        .audit-item[data-domain="olfactory"] { border-left: 4px solid #8a9e8f; }
+        .audit-item[data-domain="vestibular"]{ border-left: 4px solid #8a8fa0; }
+        .audit-item[data-domain="social"]    { border-left: 4px solid #a08a9e; }
+
+        .item-number {
+            display: inline-block;
+            background: #a0a795;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .item-text {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #212529;
+            font-weight: 500;
+            margin-bottom: 14px;
+        }
+
+        .rating-options {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .rating-button {
+            padding: 14px 8px;
+            background: white;
+            color: #495057;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .rating-button:hover {
+            border-color: #a0a795;
+            background: #f8f9fa;
+        }
+
+        .rating-button.selected {
+            background: #a0a795;
+            color: white;
+            border-color: #a0a795;
+        }
+
+        .rating-description {
+            font-size: 11px;
+            margin-top: 4px;
+            opacity: 0.8;
+            font-weight: 400;
+        }
+
+        .concern-note {
+            margin-top: 12px;
+            display: none;
+        }
+
+        .concern-note.visible { display: block; }
+
+        .concern-note textarea {
+            min-height: 60px;
+            font-size: 14px;
+            border-color: #ffc107;
+        }
+
+        .concern-note label {
+            font-size: 13px;
+            color: #856404;
+            font-weight: 600;
+        }
+
+        /* Page navigation dots */
+        .page-indicator {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .page-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .page-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #dee2e6;
+            transition: all 0.3s;
+        }
+
+        .page-dot.active {
+            background: #a0a795;
+            width: 32px;
+            border-radius: 6px;
+        }
+
+        .page-dot.completed { background: #8a9e7e; }
+
+        /* Results */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .domain-result-card {
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .domain-result-card .card-icon { font-size: 32px; margin-bottom: 8px; }
+        .domain-result-card .card-name { font-size: 14px; font-weight: 700; color: #495057; margin-bottom: 12px; }
+
+        .score-bar-wrap {
+            background: #e9ecef;
+            border-radius: 4px;
+            height: 10px;
+            margin: 8px 0;
+            overflow: hidden;
+        }
+
+        .score-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.6s ease;
+        }
+
+        .score-bar-fill.concern-high   { background: #dc3545; }
+        .score-bar-fill.concern-mod    { background: #ffc107; }
+        .score-bar-fill.concern-low    { background: #8a9e7e; }
+
+        .score-label {
+            font-size: 20px;
+            font-weight: 700;
+            color: #212529;
+        }
+
+        .concern-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .concern-badge.high     { background: #f8d7da; color: #721c24; }
+        .concern-badge.moderate { background: #fff3cd; color: #856404; }
+        .concern-badge.low      { background: #d4edda; color: #155724; }
+
+        .recommendations-section {
+            background: #f4f5f3;
+            border-left: 4px solid #a0a795;
+            border-radius: 2px;
+            padding: 24px;
+            margin-bottom: 30px;
+        }
+
+        .recommendations-section h3 { color: #787d74; margin-bottom: 16px; }
+
+        .rec-item {
+            background: white;
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            border-left: 3px solid #a0a795;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #3d3d3d;
+        }
+
+        .rec-item strong { color: #495057; }
+
+        .sticky-footer {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            position: sticky;
+            bottom: 20px;
+            margin-top: 40px;
+        }
+
+        .reference-text {
+            margin-top: 40px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #6c757d;
+            font-style: italic;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .content { padding: 20px; }
+            .header { padding: 30px 20px; }
+            .rating-options { grid-template-columns: 1fr 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+
+        @media print {
+            body { background: white; }
+            .container { box-shadow: none; }
+            button, .button-group, .sticky-footer { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="confidential-badge">CONFIDENTIAL</div>
+        <h1>Environmental Sensory Audit</h1>
+        <p>Sensory Environment Assessment for Allied Health Practitioners</p>
+    </div>
+
+    <div class="progress-bar-container" id="progressBar">
+        <div class="progress-info">
+            <span>Progress</span>
+            <span id="progressText">0 of 30 completed</span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+    </div>
+
+    <div class="content">
+
+        <!-- STEP 1: Introduction -->
+        <div class="step active" id="step-intro">
+            <h2>Welcome to the Environmental Sensory Audit</h2>
+            <div class="info-box">
+                <h3>About This Tool</h3>
+                <p>This audit systematically evaluates the sensory environment across six domains: Visual, Auditory, Tactile, Olfactory, Vestibular/Proprioceptive, and Social/Interpersonal. It is designed for use by allied health practitioners (Occupational Therapists, Behaviour Support Practitioners) during home, school, or community site visits to identify sensory barriers and supports for NDIS participants.</p>
+            </div>
+
+            <div class="warning-box">
+                ⚠️ <strong>Clinical Use Only.</strong> This tool supports clinical reasoning and does not replace a comprehensive sensory assessment (e.g., Sensory Profile, SPM-2). Results should be interpreted in the context of the participant's history, goals, and support needs. This tool is for practitioner use — it is not a self-report measure.
+            </div>
+
+            <h3>Before You Begin:</h3>
+            <ul>
+                <li>Conduct a <strong>physical walkthrough</strong> of the environment before rating</li>
+                <li>Rate based on direct observation, not reported history alone</li>
+                <li>Note the time of day — sensory conditions vary significantly</li>
+                <li>Consider the participant's specific sensory sensitivities when completing observations</li>
+                <li>Allow approximately <strong>20–30 minutes</strong> to complete</li>
+                <li>Complete separate audits for different environments (home vs. school vs. day program)</li>
+            </ul>
+
+            <div class="button-group">
+                <button class="btn-primary" onclick="goToStep('step-info')">Begin Audit</button>
+            </div>
+        </div>
+
+        <!-- STEP 2: Client & Environment Information -->
+        <div class="step" id="step-info">
+            <h2>Client &amp; Environment Information</h2>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="participantName">Participant Name *</label>
+                    <input type="text" id="participantName" placeholder="Full name" required>
+                </div>
+                <div class="form-group">
+                    <label for="ndisNumber">NDIS Number</label>
+                    <input type="text" id="ndisNumber" placeholder="43XXXXXXX">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="dateOfBirth">Date of Birth</label>
+                    <input type="date" id="dateOfBirth">
+                </div>
+                <div class="form-group">
+                    <label for="assessmentDate">Date of Audit *</label>
+                    <input type="date" id="assessmentDate">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="environmentType">Environment Type *</label>
+                <select id="environmentType">
+                    <option value="">— Select environment —</option>
+                    <option value="Home - Primary Residence">Home – Primary Residence</option>
+                    <option value="Home - Supported Independent Living (SIL)">Home – Supported Independent Living (SIL)</option>
+                    <option value="Home - Short-Term Accommodation (STA/Respite)">Home – Short-Term Accommodation (STA/Respite)</option>
+                    <option value="School - Classroom">School – Classroom</option>
+                    <option value="School - Common Areas">School – Common Areas</option>
+                    <option value="Day Program / Activity Centre">Day Program / Activity Centre</option>
+                    <option value="Workplace">Workplace</option>
+                    <option value="Community Setting">Community Setting</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="environmentAddress">Environment Address / Location Description</label>
+                <input type="text" id="environmentAddress" placeholder="Street address or descriptive location">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="timeOfDay">Time of Audit</label>
+                    <input type="time" id="timeOfDay">
+                    <div class="help-text">Sensory conditions vary by time — note if this is a typical or atypical time</div>
+                </div>
+                <div class="form-group">
+                    <label for="numberOfPeople">Number of People Present During Audit</label>
+                    <input type="number" id="numberOfPeople" min="0" placeholder="e.g., 4">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="participantPresent">Was the Participant Present During the Audit?</label>
+                <select id="participantPresent">
+                    <option value="Yes - actively observed">Yes – actively observed during audit</option>
+                    <option value="Yes - not observed during audit">Yes – present but not observed during audit</option>
+                    <option value="No - environment assessed independently">No – environment assessed without participant</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="practitionerName">Practitioner Name *</label>
+                <input type="text" id="practitionerName" placeholder="Your full name">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="practitionerRole">Practitioner Role *</label>
+                    <select id="practitionerRole">
+                        <option value="">— Select role —</option>
+                        <option value="Occupational Therapist">Occupational Therapist</option>
+                        <option value="Behaviour Support Practitioner">Behaviour Support Practitioner</option>
+                        <option value="Specialist Behaviour Support Practitioner">Specialist Behaviour Support Practitioner</option>
+                        <option value="Speech Pathologist">Speech Pathologist</option>
+                        <option value="Psychologist">Psychologist</option>
+                        <option value="Support Coordinator">Support Coordinator</option>
+                        <option value="Other Allied Health">Other Allied Health</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="practitionerEmail">Practitioner Email</label>
+                    <input type="email" id="practitionerEmail" placeholder="For PDF delivery">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="referralReason">Reason for Referral / Purpose of Audit</label>
+                <textarea id="referralReason" placeholder="e.g., Investigating potential sensory triggers for behaviours of concern, planning environmental modifications for transition to new SIL..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="knownSensoryNeeds">Known Sensory Profile / Sensory Needs (if available)</label>
+                <textarea id="knownSensoryNeeds" placeholder="e.g., Hypersensitive to auditory input, seeks proprioceptive input, avoids light touch..."></textarea>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-secondary" onclick="goToStep('step-intro')">← Back</button>
+                <button class="btn-primary" onclick="startAudit()">Begin Domain Assessments →</button>
+            </div>
+        </div>
+
+        <!-- STEP 3: Assessment Pages (domains) -->
+        <div class="step" id="step-assessment">
+            <div class="page-indicator">
+                <strong id="pageTitle">Domain 1 of 6</strong>
+                <div class="page-dots" id="pageDots"></div>
+            </div>
+
+            <div id="domainPages"></div>
+
+            <div class="button-group">
+                <button class="btn-secondary" id="prevBtn" onclick="changePage(-1)">← Previous</button>
+                <button class="btn-primary" id="nextBtn" onclick="changePage(1)">Next Domain →</button>
+            </div>
+        </div>
+
+        <!-- STEP 4: General Observations -->
+        <div class="step" id="step-observations">
+            <h2>General Observations &amp; Clinical Notes</h2>
+
+            <div class="form-group">
+                <label for="strengthsObserved">Environmental Strengths Observed</label>
+                <textarea id="strengthsObserved" style="min-height:100px" placeholder="What aspects of this environment are supportive of the participant's sensory needs?"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="barriersObserved">Key Sensory Barriers Identified</label>
+                <textarea id="barriersObserved" style="min-height:100px" placeholder="What are the most significant sensory barriers in this environment?"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="participantReactions">Participant Reactions / Observed Responses During Visit</label>
+                <textarea id="participantReactions" style="min-height:100px" placeholder="Describe any observable responses to the environment during your visit (e.g., covering ears, seeking corners, increased arousal near windows)..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="immediateRecommendations">Immediate / Low-Cost Recommendations</label>
+                <textarea id="immediateRecommendations" style="min-height:100px" placeholder="Recommendations that can be implemented quickly or at low cost..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="furtherAssessment">Further Assessment Recommended</label>
+                <select id="furtherAssessment">
+                    <option value="No further assessment indicated at this time">No further assessment indicated at this time</option>
+                    <option value="Formal sensory assessment recommended (e.g., Sensory Profile 2, SPM-2)">Formal sensory assessment recommended (e.g., Sensory Profile 2, SPM-2)</option>
+                    <option value="Functional Behaviour Assessment recommended">Functional Behaviour Assessment recommended</option>
+                    <option value="Both formal sensory assessment and FBA recommended">Both formal sensory assessment and FBA recommended</option>
+                    <option value="Referral to specialist (e.g., Sensory OT, Psychologist)">Referral to specialist (e.g., Sensory OT, Psychologist)</option>
+                    <option value="Follow-up audit recommended after modifications implemented">Follow-up audit recommended after modifications implemented</option>
+                </select>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-secondary" onclick="goToStep('step-assessment'); currentPage = domains.length - 1; renderPage();">← Back to Domains</button>
+                <button class="btn-primary" onclick="goToStep('step-results'); generateResults();">View Results →</button>
+            </div>
+        </div>
+
+        <!-- STEP 5: Results -->
+        <div class="step" id="step-results">
+            <h2>Audit Results &amp; Summary</h2>
+
+            <div class="info-box">
+                <h3>Interpretation Guide</h3>
+                <p><strong>High Concern (≥67%):</strong> Significant sensory barriers present — prioritise modifications.<br>
+                <strong>Moderate Concern (34–66%):</strong> Some barriers present — consider targeted adjustments.<br>
+                <strong>Low Concern (≤33%):</strong> Environment broadly supportive in this domain.</p>
+            </div>
+
+            <div class="results-grid" id="resultsGrid"></div>
+
+            <div class="recommendations-section" id="recommendationsSection">
+                <h3>🔧 Recommended Environmental Modifications</h3>
+                <div id="recommendationsList"></div>
+            </div>
+
+            <div class="reference-text">
+                This Environmental Sensory Audit is a practitioner-developed clinical observation tool. It does not replace standardised sensory assessments. Results should be interpreted within the full clinical context and in collaboration with the participant and their support network.<br><br>
+                For standardised sensory assessment, consider: Dunn, W. (2014). <em>Sensory Profile 2</em>. Pearson. | Parham, L.D. &amp; Ecker, C. (2007). <em>Sensory Processing Measure</em>. WPS.
+            </div>
+
+            <div class="sticky-footer">
+                <div class="button-group">
+                    <button class="btn-success" onclick="generatePDF()">📄 Download PDF Report</button>
+                    <button class="btn-export" onclick="openEmail()">📧 Email Report Instructions</button>
+                    <button class="btn-new" onclick="startNewAudit()">+ New Audit</button>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /content -->
+</div><!-- /container -->
+
+<script>
+// ─── Domain & Item Definitions ────────────────────────────────────────────────
+const domains = [
+    {
+        id: 'visual',
+        name: 'Visual',
+        icon: '👁️',
+        subtitle: 'Lighting, colour, clutter, contrast',
+        cssClass: 'domain-visual',
+        items: [
+            { id: 'v1', text: 'Lighting is harsh, flickering, or inconsistent (e.g., fluorescent lights, direct sunlight glare).' },
+            { id: 'v2', text: 'The environment is visually cluttered or contains excessive visual stimulation (posters, patterns, objects).' },
+            { id: 'v3', text: 'High contrast between surfaces is present (e.g., black and white floors, bright wall art next to plain walls).' },
+            { id: 'v4', text: 'Reflective surfaces (mirrors, glass, polished floors) create unpredictable visual effects.' },
+            { id: 'v5', text: 'The participant has limited ability to control or adjust lighting in their environment.' }
+        ]
+    },
+    {
+        id: 'auditory',
+        name: 'Auditory',
+        icon: '👂',
+        subtitle: 'Noise, acoustics, unpredictable sounds',
+        cssClass: 'domain-auditory',
+        items: [
+            { id: 'a1', text: 'Background noise levels are consistently high (e.g., traffic, machinery, multiple conversations).' },
+            { id: 'a2', text: 'Unpredictable or sudden loud sounds occur in this environment (e.g., alarms, doors slamming, raised voices).' },
+            { id: 'a3', text: 'Acoustics are poor — echoing, reverberant, or sounds travel significantly between rooms/areas.' },
+            { id: 'a4', text: 'Multiple competing noise sources are present simultaneously (e.g., TV, radio, conversation, appliances).' },
+            { id: 'a5', text: 'The participant has limited ability to reduce or escape auditory input (no quiet space available).' }
+        ]
+    },
+    {
+        id: 'tactile',
+        name: 'Tactile',
+        icon: '✋',
+        subtitle: 'Textures, temperature, unexpected touch',
+        cssClass: 'domain-tactile',
+        items: [
+            { id: 't1', text: 'Seating, bedding, or clothing items in the environment have textures the participant finds aversive.' },
+            { id: 't2', text: 'Temperature regulation is poor — environment is too hot, too cold, or fluctuates frequently.' },
+            { id: 't3', text: 'The environment places the participant at risk of unexpected or unwanted touch from others.' },
+            { id: 't4', text: 'Surfaces the participant regularly contacts (floors, walls, furniture) may be aversive to their touch sensitivity.' },
+            { id: 't5', text: 'Access to preferred tactile input (e.g., weighted items, fidget tools, textured objects) is limited or unavailable.' }
+        ]
+    },
+    {
+        id: 'olfactory',
+        name: 'Olfactory',
+        icon: '👃',
+        subtitle: 'Smell, chemical sensitivity, air quality',
+        cssClass: 'domain-olfactory',
+        items: [
+            { id: 'o1', text: 'Strong or persistent odours are present (e.g., cleaning products, food smells, pet odours, perfume).' },
+            { id: 'o2', text: 'Cleaning products or air fresheners with strong chemical smells are used regularly in this environment.' },
+            { id: 'o3', text: 'Ventilation is poor — smells linger and the participant cannot easily access fresh air.' },
+            { id: 'o4', text: 'Food preparation odours regularly permeate living or working areas.' },
+            { id: 'o5', text: 'The participant is exposed to other people\'s personal hygiene products (perfume, hairspray, deodorant) in close proximity.' }
+        ]
+    },
+    {
+        id: 'vestibular',
+        name: 'Vestibular / Proprioceptive',
+        icon: '⚖️',
+        subtitle: 'Movement, furniture, spatial demands',
+        cssClass: 'domain-vestibular',
+        items: [
+            { id: 'p1', text: 'The environment restricts or limits movement — participant cannot pace, rock, or move freely when needed.' },
+            { id: 'p2', text: 'Furniture does not provide adequate proprioceptive support (e.g., chairs too soft/hard, no floor seating options).' },
+            { id: 'p3', text: 'Transitions between areas require navigating unpredictable movement experiences (busy corridors, crowds, uneven ground).' },
+            { id: 'p4', text: 'There is no designated space for movement breaks or sensory regulation activities.' },
+            { id: 'p5', text: 'The environment provides insufficient opportunity for heavy work or proprioceptive input (e.g., carrying, pushing, climbing).' }
+        ]
+    },
+    {
+        id: 'social',
+        name: 'Social / Interpersonal',
+        icon: '🤝',
+        subtitle: 'Social demands, personal space, predictability',
+        cssClass: 'domain-social',
+        items: [
+            { id: 's1', text: 'The environment places high unpredictable social demands on the participant (unexpected visitors, changing personnel).' },
+            { id: 's2', text: 'Personal space is routinely compromised — the participant cannot achieve adequate physical distance from others.' },
+            { id: 's3', text: 'The participant has limited ability to withdraw from social interaction when overwhelmed (no retreat space available).' },
+            { id: 's4', text: 'Communication expectations in this environment do not match the participant\'s communication needs or style.' },
+            { id: 's5', text: 'Routines and expectations in the environment are unpredictable or poorly communicated to the participant.' }
+        ]
+    }
+];
+
+const ratingLabels = [
+    { value: 0, label: 'Not Present', desc: 'Not observed' },
+    { value: 1, label: 'Mild', desc: 'Minor concern' },
+    { value: 2, label: 'Moderate', desc: 'Noticeable concern' },
+    { value: 3, label: 'Significant', desc: 'Major concern' }
+];
+
+// ─── State ─────────────────────────────────────────────────────────────────────
+let currentStep = 'step-intro';
+let currentPage = 0;
+let responses = {};
+let concernNotes = {};
+let auditData = {};
+
+// ─── Navigation ────────────────────────────────────────────────────────────────
+function goToStep(stepId) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById(stepId).classList.add('active');
+    currentStep = stepId;
+    const pb = document.getElementById('progressBar');
+    pb.classList.toggle('active', stepId === 'step-assessment');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function startAudit() {
+    // Validate required fields
+    const name = document.getElementById('participantName').value.trim();
+    const date = document.getElementById('assessmentDate').value;
+    const env = document.getElementById('environmentType').value;
+    const pract = document.getElementById('practitionerName').value.trim();
+    const role = document.getElementById('practitionerRole').value;
+    if (!name || !date || !env || !pract || !role) {
+        alert('Please complete all required fields (*) before continuing.');
+        return;
+    }
+    buildDomainPages();
+    goToStep('step-assessment');
+    currentPage = 0;
+    renderPage();
+}
+
+function buildDomainPages() {
+    const container = document.getElementById('domainPages');
+    const dots = document.getElementById('pageDots');
+    container.innerHTML = '';
+    dots.innerHTML = '';
+
+    domains.forEach((domain, di) => {
+        // Page div
+        const page = document.createElement('div');
+        page.className = 'assessment-page' + (di === 0 ? ' active' : '');
+        page.id = `page-${di}`;
+
+        // Domain header
+        const dh = document.createElement('div');
+        dh.className = `domain-header ${domain.cssClass}`;
+        dh.innerHTML = `<div class="domain-icon">${domain.icon}</div><div><div class="domain-title">${domain.name}</div><div class="domain-subtitle">${domain.subtitle}</div></div>`;
+        page.appendChild(dh);
+
+        // Items
+        domain.items.forEach((item, ii) => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'audit-item';
+            itemDiv.setAttribute('data-domain', domain.id);
+            itemDiv.id = `item-${item.id}`;
+
+            const badge = `<span class="item-number">Item ${di * 5 + ii + 1} of 30</span>`;
+            const text = `<div class="item-text">${item.text}</div>`;
+
+            let ratingHtml = '<div class="rating-options">';
+            ratingLabels.forEach(r => {
+                ratingHtml += `<button class="rating-button" onclick="selectRating('${item.id}', ${r.value}, this)" data-value="${r.value}">
+                    ${r.label}<div class="rating-description">${r.desc}</div>
+                </button>`;
+            });
+            ratingHtml += '</div>';
+
+            const noteHtml = `<div class="concern-note" id="note-${item.id}">
+                <label>📝 Observation note (optional):</label>
+                <textarea placeholder="Describe what you observed..." onchange="concernNotes['${item.id}'] = this.value"></textarea>
+            </div>`;
+
+            itemDiv.innerHTML = badge + text + ratingHtml + noteHtml;
+            page.appendChild(itemDiv);
+        });
+
+        container.appendChild(page);
+
+        // Dot
+        const dot = document.createElement('div');
+        dot.className = 'page-dot' + (di === 0 ? ' active' : '');
+        dot.id = `dot-${di}`;
+        dots.appendChild(dot);
+    });
+}
+
+function renderPage() {
+    document.querySelectorAll('.assessment-page').forEach((p, i) => {
+        p.classList.toggle('active', i === currentPage);
+    });
+    document.querySelectorAll('.page-dot').forEach((d, i) => {
+        d.classList.remove('active', 'completed');
+        if (i === currentPage) d.classList.add('active');
+        else if (isDomainComplete(i)) d.classList.add('completed');
+    });
+    document.getElementById('pageTitle').textContent = `Domain ${currentPage + 1} of ${domains.length}: ${domains[currentPage].name}`;
+    document.getElementById('prevBtn').style.display = currentPage === 0 ? 'none' : 'block';
+    const nextBtn = document.getElementById('nextBtn');
+    nextBtn.textContent = currentPage === domains.length - 1 ? 'Continue to Observations →' : 'Next Domain →';
+    updateProgress();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function changePage(dir) {
+    const newPage = currentPage + dir;
+    if (newPage < 0) { goToStep('step-info'); return; }
+    if (newPage >= domains.length) { goToStep('step-observations'); return; }
+    currentPage = newPage;
+    renderPage();
+}
+
+function isDomainComplete(domainIndex) {
+    return domains[domainIndex].items.every(item => responses[item.id] !== undefined);
+}
+
+function updateProgress() {
+    const total = domains.reduce((a, d) => a + d.items.length, 0);
+    const answered = Object.keys(responses).length;
+    const pct = Math.round((answered / total) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressText').textContent = `${answered} of ${total} completed`;
+}
+
+function selectRating(itemId, value, btn) {
+    responses[itemId] = value;
+    // Update button states
+    const parent = btn.closest('.rating-options');
+    parent.querySelectorAll('.rating-button').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    // Mark item answered
+    const itemDiv = document.getElementById(`item-${itemId}`);
+    itemDiv.classList.add('answered');
+    // Show note field if moderate or significant concern
+    const noteDiv = document.getElementById(`note-${itemId}`);
+    noteDiv.classList.toggle('visible', value >= 2);
+    updateProgress();
+}
+
+// ─── Results ────────────────────────────────────────────────────────────────────
+function generateResults() {
+    const grid = document.getElementById('resultsGrid');
+    const recList = document.getElementById('recommendationsList');
+    grid.innerHTML = '';
+    recList.innerHTML = '';
+
+    const recommendations = {
+        visual: [
+            'Replace fluorescent lighting with warm LED bulbs or daylight-balanced tubes with dimmer switches.',
+            'Add blackout blinds or adjustable window coverings to manage natural light and glare.',
+            'Reduce visual clutter — clear surfaces, use storage boxes, and limit wall decorations in key areas.',
+            'Use consistent, low-contrast colour schemes on walls and floors.',
+            'Consider a visual schedule or predictable visual structure to reduce uncertainty.'
+        ],
+        auditory: [
+            'Add soft furnishings (rugs, curtains, cushions) to absorb sound and reduce reverberation.',
+            'Provide noise-cancelling headphones or ear defenders as a readily available tool.',
+            'Establish a designated quiet space or sensory retreat area.',
+            'Review and reduce unnecessary background noise sources (TV on for background, radio).',
+            'Use visual alerts (flashing light) rather than auditory alarms where possible.'
+        ],
+        tactile: [
+            'Review and replace aversive textures in bedding, seating, or clothing with participant-preferred alternatives.',
+            'Improve temperature regulation — review heating/cooling systems, provide access to fans or blankets.',
+            'Create clear spatial boundaries to reduce unexpected touch from others.',
+            'Ensure access to preferred tactile tools (weighted lap pads, fidget items, textured objects).',
+            'Consult OT regarding therapeutic touch and deep pressure strategies.'
+        ],
+        olfactory: [
+            'Switch to fragrance-free cleaning products and personal care items throughout the environment.',
+            'Improve ventilation — open windows during cooking, use exhaust fans.',
+            'Request a fragrance-free policy for staff and regular visitors.',
+            'Designate a low-odour retreat area away from kitchen and cleaning product storage.',
+            'Identify and eliminate or reduce key olfactory triggers identified during the audit.'
+        ],
+        vestibular: [
+            'Designate a movement break area with space to pace, stretch, or engage in heavy work activities.',
+            'Review seating — trial firmer seating options, floor cushions, or wobble stools.',
+            'Introduce a scheduled movement break routine into the daily program.',
+            'Consult OT for a "sensory diet" tailored to vestibular/proprioceptive needs.',
+            'Reduce transitions through unpredictable or crowded environments where possible.'
+        ],
+        social: [
+            'Establish a clear retreat space where the participant can withdraw from social interaction.',
+            'Create a visual schedule to improve predictability of social demands and personnel.',
+            'Review staffing consistency — reduce number of different support workers where possible.',
+            'Clearly define and communicate personal space boundaries to all support staff.',
+            'Implement low-demand periods into the daily routine to reduce social load.'
+        ]
+    };
+
+    domains.forEach(domain => {
+        const maxScore = domain.items.length * 3;
+        const score = domain.items.reduce((sum, item) => sum + (responses[item.id] || 0), 0);
+        const pct = Math.round((score / maxScore) * 100);
+        const level = pct >= 67 ? 'high' : pct >= 34 ? 'moderate' : 'low';
+        const levelLabel = level === 'high' ? 'High Concern' : level === 'moderate' ? 'Moderate Concern' : 'Low Concern';
+
+        const card = document.createElement('div');
+        card.className = 'domain-result-card';
+        card.innerHTML = `
+            <div class="card-icon">${domain.icon}</div>
+            <div class="card-name">${domain.name}</div>
+            <div class="score-label">${score} / ${maxScore}</div>
+            <div class="score-bar-wrap"><div class="score-bar-fill concern-${level}" style="width:${pct}%"></div></div>
+            <div style="font-size:12px;color:#6c757d;margin-bottom:6px">${pct}%</div>
+            <span class="concern-badge ${level}">${levelLabel}</span>
+        `;
+        grid.appendChild(card);
+
+        // Add recs for moderate/high
+        if (level !== 'low') {
+            const header = document.createElement('div');
+            header.innerHTML = `<strong style="color:#495057;font-size:15px;">${domain.icon} ${domain.name} — ${levelLabel}</strong>`;
+            recList.appendChild(header);
+
+            // Pick top 3 recommendations
+            recommendations[domain.id].slice(0, 3).forEach(rec => {
+                const el = document.createElement('div');
+                el.className = 'rec-item';
+                el.textContent = rec;
+                recList.appendChild(el);
+            });
+        }
+    });
+
+    if (recList.innerHTML === '') {
+        recList.innerHTML = '<div class="rec-item">No domains rated at moderate or high concern. Maintain current environmental supports and review if participant needs change.</div>';
+    }
+}
+
+// ─── PDF Generation ─────────────────────────────────────────────────────────────
+async function generatePDF() {
+    const btn = event.target;
+    btn.textContent = 'Generating PDF…';
+    btn.disabled = true;
+
+    try {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        const pageWidth = 210;
+        const pageHeight = 297;
+        const margin = 15;
+        let y = 0;
+
+        const brandR = 160, brandG = 167, brandB = 149;
+
+        function checkPage(needed = 15) {
+            if (y + needed > pageHeight - 20) {
+                pdf.addPage();
+                y = margin;
+                // Mini header on continuation pages
+                pdf.setFillColor(brandR, brandG, brandB);
+                pdf.rect(0, 0, pageWidth, 12, 'F');
+                pdf.setTextColor(255,255,255);
+                pdf.setFontSize(8);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text('CONFIDENTIAL — Environmental Sensory Audit', margin, 8);
+                y = 20;
+                pdf.setTextColor(0,0,0);
+            }
+        }
+
+        // ── Page 1 Header ──
+        pdf.setFillColor(brandR, brandG, brandB);
+        pdf.rect(0, 0, pageWidth, 38, 'F');
+        pdf.setTextColor(255,255,255);
+        pdf.setFontSize(8);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('CONFIDENTIAL', margin, 10);
+        pdf.setFontSize(20);
+        pdf.text('Environmental Sensory Audit', margin, 22);
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text('Sensory Environment Assessment for Allied Health Practitioners', margin, 30);
+        y = 48;
+        pdf.setTextColor(0,0,0);
+
+        // ── Client Info ──
+        const d = {
+            name:     document.getElementById('participantName').value,
+            ndis:     document.getElementById('ndisNumber').value,
+            dob:      document.getElementById('dateOfBirth').value,
+            date:     document.getElementById('assessmentDate').value,
+            env:      document.getElementById('environmentType').value,
+            address:  document.getElementById('environmentAddress').value,
+            time:     document.getElementById('timeOfDay').value,
+            present:  document.getElementById('participantPresent').value,
+            pract:    document.getElementById('practitionerName').value,
+            role:     document.getElementById('practitionerRole').value,
+            reason:   document.getElementById('referralReason').value,
+            known:    document.getElementById('knownSensoryNeeds').value
+        };
+
+        pdf.setFontSize(13);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Client & Environment Information', margin, y);
+        y += 8;
+
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'normal');
+        const infoLines = [
+            `Participant: ${d.name}`,
+            d.ndis ? `NDIS Number: ${d.ndis}` : null,
+            d.dob  ? `Date of Birth: ${d.dob}` : null,
+            `Date of Audit: ${d.date}`,
+            `Environment: ${d.env}`,
+            d.address ? `Location: ${d.address}` : null,
+            d.time ? `Time of Audit: ${d.time}` : null,
+            `Participant Present: ${d.present}`,
+            `Practitioner: ${d.pract} (${d.role})`
+        ].filter(Boolean);
+
+        infoLines.forEach(line => {
+            const split = pdf.splitTextToSize(line, pageWidth - 2 * margin);
+            split.forEach(l => { pdf.text(l, margin, y); y += 5; });
+        });
+
+        if (d.reason) {
+            y += 3;
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('Reason for Audit:', margin, y); y += 5;
+            pdf.setFont('helvetica', 'normal');
+            const rs = pdf.splitTextToSize(d.reason, pageWidth - 2 * margin);
+            rs.forEach(l => { pdf.text(l, margin, y); y += 5; });
+        }
+
+        if (d.known) {
+            y += 3;
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('Known Sensory Profile:', margin, y); y += 5;
+            pdf.setFont('helvetica', 'normal');
+            const ks = pdf.splitTextToSize(d.known, pageWidth - 2 * margin);
+            ks.forEach(l => { pdf.text(l, margin, y); y += 5; });
+        }
+
+        y += 8;
+        checkPage();
+
+        // ── Domain Scores Table ──
+        pdf.setFontSize(13);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Domain Scores Summary', margin, y); y += 8;
+
+        // Table header
+        pdf.setFillColor(brandR, brandG, brandB);
+        pdf.setTextColor(255,255,255);
+        pdf.rect(margin, y - 5, pageWidth - 2*margin, 8, 'F');
+        pdf.setFontSize(9);
+        pdf.text('Domain', margin+2, y);
+        pdf.text('Score', margin+70, y);
+        pdf.text('%', margin+95, y);
+        pdf.text('Concern Level', margin+115, y);
+        y += 8;
+        pdf.setTextColor(0,0,0);
+        pdf.setFont('helvetica', 'normal');
+
+        domains.forEach((domain, di) => {
+            const maxScore = domain.items.length * 3;
+            const score = domain.items.reduce((s, item) => s + (responses[item.id] || 0), 0);
+            const pct = Math.round((score / maxScore) * 100);
+            const level = pct >= 67 ? 'High Concern' : pct >= 34 ? 'Moderate Concern' : 'Low Concern';
+            if (di % 2 === 0) {
+                pdf.setFillColor(248, 249, 250);
+                pdf.rect(margin, y-5, pageWidth-2*margin, 7, 'F');
+            }
+            pdf.text(`${domain.name}`, margin+2, y);
+            pdf.text(`${score}/${maxScore}`, margin+70, y);
+            pdf.text(`${pct}%`, margin+95, y);
+            pdf.text(level, margin+115, y);
+            y += 7;
+        });
+
+        y += 10;
+        checkPage(30);
+
+        // ── Item-Level Detail ──
+        pdf.setFontSize(13);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Item-Level Results', margin, y); y += 8;
+
+        domains.forEach(domain => {
+            checkPage(20);
+            pdf.setFontSize(11);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text(`${domain.name} Domain`, margin, y); y += 6;
+            pdf.setFontSize(9);
+            pdf.setFont('helvetica', 'normal');
+
+            domain.items.forEach(item => {
+                checkPage(14);
+                const r = responses[item.id];
+                const rLabel = r !== undefined ? ratingLabels[r].label : 'Not rated';
+                const textLines = pdf.splitTextToSize(`• ${item.text}`, pageWidth - 2*margin - 40);
+                textLines.forEach(l => { pdf.text(l, margin+2, y); y += 5; });
+                pdf.setFont('helvetica', 'bold');
+                pdf.text(`Rating: ${rLabel}`, margin+4, y); y += 5;
+                pdf.setFont('helvetica', 'normal');
+                const note = concernNotes[item.id];
+                if (note) {
+                    const ns = pdf.splitTextToSize(`Note: ${note}`, pageWidth - 2*margin - 4);
+                    pdf.setTextColor(133, 100, 4);
+                    ns.forEach(l => { pdf.text(l, margin+4, y); y += 5; });
+                    pdf.setTextColor(0,0,0);
+                }
+                y += 2;
+            });
+            y += 4;
+        });
+
+        checkPage(30);
+
+        // ── General Observations ──
+        pdf.setFontSize(13);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('General Observations & Clinical Notes', margin, y); y += 8;
+
+        const obs = [
+            { label: 'Environmental Strengths', field: 'strengthsObserved' },
+            { label: 'Key Sensory Barriers', field: 'barriersObserved' },
+            { label: 'Participant Reactions During Visit', field: 'participantReactions' },
+            { label: 'Immediate / Low-Cost Recommendations', field: 'immediateRecommendations' },
+            { label: 'Further Assessment Recommended', field: 'furtherAssessment' }
+        ];
+
+        obs.forEach(o => {
+            const val = document.getElementById(o.field).value || document.getElementById(o.field).options?.[document.getElementById(o.field).selectedIndex]?.text || '';
+            if (!val) return;
+            checkPage(14);
+            pdf.setFontSize(10);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text(`${o.label}:`, margin, y); y += 5;
+            pdf.setFont('helvetica', 'normal');
+            const lines = pdf.splitTextToSize(val, pageWidth - 2*margin);
+            lines.forEach(l => { pdf.text(l, margin, y); y += 5; });
+            y += 3;
+        });
+
+        y += 5;
+        checkPage(20);
+
+        // ── Footer ──
+        pdf.setFontSize(8);
+        pdf.setFont('helvetica', 'italic');
+        pdf.setTextColor(108,117,125);
+        const footer = 'This Environmental Sensory Audit is a practitioner-developed clinical observation tool and does not replace standardised sensory assessments (e.g., Sensory Profile 2, SPM-2). Results should be interpreted within the full clinical context and in collaboration with the participant and their support network. Generated via the Allied Health Sensory Audit Tool.';
+        const footerLines = pdf.splitTextToSize(footer, pageWidth - 2*margin);
+        footerLines.forEach(l => { pdf.text(l, margin, y); y += 4; });
+
+        // Download
+        const fileName = `ESA_${d.name.replace(/\s+/g,'_')}_${d.date}.pdf`;
+        pdf.save(fileName);
+        btn.textContent = '✅ PDF Downloaded!';
+        setTimeout(() => { btn.textContent = '📄 Download PDF Report'; btn.disabled = false; }, 3000);
+
+    } catch (err) {
+        console.error(err);
+        alert('PDF generation error. Please use your browser\'s Print function (Ctrl+P / Cmd+P) and choose Save as PDF.');
+        btn.textContent = '📄 Download PDF Report';
+        btn.disabled = false;
+    }
+}
+
+function openEmail() {
+    const name = document.getElementById('participantName').value || 'Participant';
+    const date = document.getElementById('assessmentDate').value || 'today';
+    const email = document.getElementById('practitionerEmail').value || '';
+    const subject = `Environmental Sensory Audit – ${name} – ${date}`;
+    const body = `Please find attached the Environmental Sensory Audit report.\n\nParticipant: ${name}\nDate of Audit: ${date}\n\nThe PDF report has been downloaded to your device. Please attach it to this email before sending.\n\nNote: File is named ESA_${name.replace(/\s+/g,'_')}_${date}.pdf`;
+    window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+
+function startNewAudit() {
+    if (confirm('Start a new audit? All current data will be lost unless you have downloaded the PDF.')) {
+        responses = {};
+        concernNotes = {};
+        document.querySelectorAll('input, textarea').forEach(el => el.value = '');
+        document.getElementById('assessmentDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('environmentType').selectedIndex = 0;
+        document.getElementById('participantPresent').selectedIndex = 0;
+        document.getElementById('practitionerRole').selectedIndex = 0;
+        document.getElementById('furtherAssessment').selectedIndex = 0;
+        currentPage = 0;
+        goToStep('step-intro');
+    }
+}
+
+// Set today's date on load
+window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('assessmentDate').value = new Date().toISOString().split('T')[0];
+});
+</script>
+</body>
+</html>
