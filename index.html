@@ -3,66 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinical Tools Dashboard</title>
+    <title>Driftwood Therapeutic Supports - Clinical Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+    
     <style>
+        :root {
+            --bg-color: #f2f5f7;       /* Mist background - soft, calming gray-blue */
+            --card-bg: #ffffff;        /* Crisp clean white for readability */
+            --text-main: #1e293b;      /* Deep slate for clear reading comfort */
+            --text-muted: #64748b;    /* Restrained secondary prose tone */
+            
+            /* Driftwood Coastal Palette */
+            --tide-accent: #254e5e;    /* Deep Tide Ocean Blue */
+            --shore-accent: #8c7662;   /* Warm, grounding Shore Driftwood */
+            --sand-bg: #f9f6f0;        /* Soft Sand for secondary highlights */
+            
+            --border-radius: 8px;      /* Restrained, professional corners */
+            --transition: all 0.25s ease-in-out;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f6f8fa;
-            color: #24292f;
+            font-family: 'Jost', sans-serif;
+            font-weight: 300;          /* Clean, light weight matching your document prose */
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
+            min-height: 100vh;
+            box-sizing: border-box;
+            line-spacing: 1.6;         /* Generous spacing to support reading comfort */
         }
-        .container {
-            background: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            text-align: center;
-            max-width: 500px;
+
+        .portal-wrapper {
+            max-width: 850px;
             width: 100%;
         }
-        h1 {
-            color: #0969da;
-            margin-bottom: 8px;
-            font-size: 28px;
+
+        header {
+            text-align: center;
+            margin-bottom: 48px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 24px;
         }
-        p {
-            color: #57606a;
-            margin-bottom: 32px;
+
+        header h1 {
+            font-size: 34px;
+            font-weight: 400;          /* Elegant, minimalist weight */
+            color: var(--tide-accent);
+            margin: 0 0 8px 0;
+            letter-spacing: 0.5px;
+            text-transform: uppercase; /* Clean corporate styling */
         }
+
+        header p {
+            font-size: 16px;
+            color: var(--text-muted);
+            margin: 0;
+            font-style: italic;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 28px;
+        }
+
+        .tool-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 36px;
+            text-align: left;
+            box-shadow: 0 4px 15px rgba(37, 78, 94, 0.04); /* Subtly tinted with Tide color */
+            border-left: 5px solid var(--tide-accent);     /* Tide accent border styling */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: var(--transition);
+        }
+
+        /* Second card takes on the warm Shore/Sand palette */
+        .tool-card.alt {
+            border-left-color: var(--shore-accent);
+            background-color: var(--sand-bg);
+        }
+
+        .tool-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(37, 78, 94, 0.08);
+        }
+
+        .tool-title {
+            font-size: 21px;
+            font-weight: 600;
+            margin: 0 0 14px 0;
+            color: var(--tide-accent);
+            letter-spacing: 0.2px;
+        }
+
+        .tool-card.alt .tool-title {
+            color: var(--shore-accent);
+        }
+
+        .tool-description {
+            font-size: 14.5px;
+            line-height: 1.6;
+            color: var(--text-main);
+            margin: 0 0 28px 0;
+            flex-grow: 1;
+        }
+
         .btn {
             display: block;
-            background-color: #2da44e;
+            text-align: center;
+            background-color: var(--tide-accent);
             color: white;
-            padding: 14px;
-            margin: 12px 0;
-            border-radius: 6px;
+            padding: 12px 24px;
+            border-radius: 4px;
             text-decoration: none;
-            font-weight: 600;
-            transition: background-color 0.2s;
+            font-weight: 400;
+            font-size: 14px;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            transition: var(--transition);
         }
+
         .btn:hover {
-            background-color: #2c974b;
+            background-color: #1a3744;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        .btn-alt {
-            background-color: #0969da;
+
+        .tool-card.alt .btn {
+            background-color: var(--shore-accent);
         }
-        .btn-alt:hover {
-            background-color: #0c63e2;
+
+        .tool-card.alt .btn:hover {
+            background-color: #705e4e;
+        }
+
+        footer {
+            margin-top: 60px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Clinical Tools</h1>
-    <p>Select a practitioner tool below to begin assessment.</p>
-    
-    <a class="btn btn-alt" href="QABF_Professional_Tool (6).html">QABF Professional Tool</a>
-    <a class="btn" href="Environmental_Sensory_Audit.html">Environmental Sensory Audit</a>
+<div class="portal-wrapper">
+    <header>
+        <h1>Driftwood Therapeutic Supports</h1>
+        <p>Interactive Clinical Frameworks & Practice Tools</p>
+    </header>
+
+    <div class="tools-grid">
+        <div class="tool-card">
+            <div>
+                <h2 class="tool-title">QABF Professional Tool</h2>
+                <p class="tool-description">Questions About Behavioral Function framework. Complete the interactive assessment to systematically evaluate, score, and analyze the maintaining variables of targeted behaviors.</p>
+            </div>
+            <a class="btn" href="QABF_Professional_Tool (6).html">Launch Framework</a>
+        </div>
+
+        <div class="tool-card alt">
+            <div>
+                <h2 class="tool-title">Environmental Sensory Audit</h2>
+                <p class="tool-description">Identify environmental sensory inputs, triggers, and practical structural adjustments required to optimize behavioral environment support plans.</p>
+            </div>
+            <a class="btn" href="Environmental_Sensory_Audit.html">Launch Audit</a>
+        </div>
+    </div>
+
+    <footer>
+        <p>Driftwood Therapeutic Supports &bull; Port Macquarie, NSW &bull; NDIS Registration No. P0004594</p>
+    </footer>
 </div>
 
 </body>
