@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QABF Assessment Tool - Professional Edition</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #a0a795;
+            padding: 40px;
+            color: white;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.05) 100%);
+            pointer-events: none;
+        }
+
+        .confidential-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.15);
+            padding: 4px 12px;
+            border-radius: 2px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-bar-container {
+            background: #f8f9fa;
+            padding: 20px 40px;
+            display: none;
+        }
+
+        .progress-bar-container.active {
+            display: block;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #a0a795;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        .info-box {
+            background: #f4f5f3;
+            border-left: 4px solid #a0a795;
+            border-radius: 2px;
+            padding: 20px;
+            margin-bottom: 30px;
+            color: #3d3d3d;
+        }
+
+        .info-box h3 {
+            margin: 0 0 10px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #787d74;
+        }
+
+        .info-box p {
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 30px;
+            color: #856404;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+            color: #155724;
+            font-size: 14px;
+        }
+
+        ul {
+            line-height: 2;
+            color: #495057;
+            padding-left: 20px;
+            margin: 15px 0;
+        }
+
+        h2 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #a0a795;
+        }
+
+        .help-text {
+            font-size: 13px;
+            color: #6c757d;
+            margin-top: 6px;
+            font-style: italic;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .btn-primary {
+            background: #a0a795;
+            color: white;
+            flex: 2;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #8a8f80;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-success {
+            background: #8a9e7e;
+            color: white;
+            flex: 2;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: #7a8e6e;
+        }
+
+        .btn-new {
+            background: #28a745;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-export {
+            background: #17a2b8;
+            color: white;
+            flex: 1;
+        }
+
+        .assessment-page {
+            display: none;
+        }
+
+        .assessment-page.active {
+            display: block;
+        }
+
+        .page-indicator {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .page-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .page-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #dee2e6;
+            transition: all 0.3s;
+        }
+
+        .page-dot.active {
+            background: #a0a795;
+            width: 32px;
+            border-radius: 6px;
+        }
+
+        .page-dot.completed {
+            background: #8a9e7e;
+        }
+
+        .assessment-item {
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            transition: all 0.3s;
+        }
+
+        .assessment-item.completed {
+            background: #f8f9fa;
+            border-color: #a0a795;
+        }
+
+        /* Color cues for chunking */
+        .assessment-item[data-chunk="1"] { border-left: 4px solid #a0a795; }
+        .assessment-item[data-chunk="2"] { border-left: 4px solid #b0b5a5; }
+        .assessment-item[data-chunk="3"] { border-left: 4px solid #c0c5b5; }
+        .assessment-item[data-chunk="4"] { border-left: 4px solid #8a9e7e; }
+        .assessment-item[data-chunk="5"] { border-left: 4px solid #9aae8e; }
+
+        .item-badge {
+            display: inline-block;
+            background: #a0a795;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .item-text {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #212529;
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+
+        .rating-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .rating-button {
+            padding: 16px 12px;
+            background: white;
+            color: #495057;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .rating-button:hover {
+            border-color: #a0a795;
+            background: #f8f9fa;
+        }
+
+        .rating-button.selected {
+            background: #a0a795;
+            color: white;
+            border-color: #a0a795;
+        }
+
+        .rating-description {
+            font-size: 11px;
+            margin-top: 4px;
+            opacity: 0.8;
+            font-weight: 400;
+        }
+
+        .results-summary {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #495057;
+            margin-bottom: 30px;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 40px;
+        }
+
+        .results-table thead {
+            background: #a0a795;
+            color: white;
+        }
+
+        .results-table th {
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .results-table td {
+            padding: 16px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .results-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .interpretation-badge {
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .interpretation-high {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .interpretation-moderate {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .interpretation-low {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 24px;
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #495057;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .reference-text {
+            margin-top: 40px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #6c757d;
+            font-style: italic;
+            text-align: center;
+        }
+
+        .sticky-footer {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            position: sticky;
+            bottom: 20px;
+            margin-top: 40px;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            .container {
+                box-shadow: none;
+            }
+            button, .button-group {
+                display: none !important;
+            }
+            .sticky-footer {
+                display: none !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+            .header {
+                padding: 30px 20px;
+            }
+            .rating-options {
+                grid-template-columns: 1fr 1fr;
+            }
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="confidential-badge">CONFIDENTIAL</div>
+            <h1>QABF Assessment</h1>
+            <p>Questions About Behavioral Function</p>
+        </div>
+
+        <div class="progress-bar-container" id="progressBar">
+            <div class="progress-info">
+                <span>Progress</span>
+                <span id="progressText">0 of 25 completed</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Step 1: Introduction -->
+            <div class="step active" id="step-intro">
+                <h2>Welcome to the QABF Assessment Tool</h2>
+                <div class="info-box">
+                    <h3>About This Assessment</h3>
+                    <p>The QABF is a standardized tool to identify the function(s) maintaining behaviour of concern. It consists of 25 items rated on a 0-3 scale across five behavioral functions: Attention, Escape, Non-Social, Physical, and Tangible.</p>
+                </div>
+
+                <h3>Before You Begin:</h3>
+                <ul>
+                    <li><strong>Identify one specific behavior</strong> to assess (e.g., "hand biting", "screaming", "property destruction")</li>
+                    <li>Complete separate assessments for different behaviors</li>
+                    <li>Base ratings on actual observations, not assumptions</li>
+                    <li>Consider recent patterns (last 1-2 weeks)</li>
+                    <li>Allow approximately 15-20 minutes to complete</li>
+                </ul>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="checkDraftAssessment()">Begin Assessment</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Participant Information -->
+            <div class="step" id="step-info">
+                <h2>Participant Information</h2>
+                
+                <div class="form-group">
+                    <label for="participantName">Participant Name *</label>
+                    <input type="text" id="participantName" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="targetBehavior">Target Behavior to be Assessed *</label>
+                    <input type="text" id="targetBehavior" placeholder="e.g., Head hitting, Screaming, Leaving designated area" required>
+                    <div class="help-text">Specify one observable behavior. This assessment is only valid for a single behavior topography.</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="behaviorDescription">Behavioral Description (Optional)</label>
+                    <textarea id="behaviorDescription" placeholder="Operational definition: What does the behavior look like? How is it measured?"></textarea>
+                    <div class="help-text">Provide additional context that may help with interpretation</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="ndisNumber">NDIS Number</label>
+                    <input type="text" id="ndisNumber">
+                </div>
+
+                <div class="form-group">
+                    <label for="assessmentDate">Date of Assessment *</label>
+                    <input type="date" id="assessmentDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="informantName">Informant Name *</label>
+                    <input type="text" id="informantName" placeholder="Person completing this assessment" required>
+                    <div class="help-text">The person who has observed the behavior and is completing this assessment</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="informantRole">Informant Role *</label>
+                    <input type="text" id="informantRole" placeholder="e.g., Support Worker, Parent, Teacher" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="location">Location *</label>
+                    <input type="text" id="location" placeholder="e.g., Home, School, Day Program" required>
+                    <div class="help-text">Primary setting where the behavior occurs</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="completedBy">Practitioner Name *</label>
+                    <input type="text" id="completedBy" required>
+                    <div class="help-text">Behaviour Support Practitioner coordinating this assessment</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="practitionerEmail">Practitioner Email (Optional)</label>
+                    <input type="email" id="practitionerEmail" placeholder="your.email@example.com">
+                    <div class="help-text">If provided, the 'Email Results' button will auto-populate this address</div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="goToStep('intro')">Back</button>
+                    <button class="btn-primary" id="continueToAssessment" onclick="goToStep('assessment')">Continue to Assessment</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Assessment Items -->
+            <div class="step" id="step-assessment">
+                <div class="warning-box">
+                    <strong>Rating Guide:</strong> For each item, select how often the behavior occurs in the described situation. Progress is automatically saved.
+                </div>
+
+                <div class="page-indicator">
+                    <div style="font-size: 14px; font-weight: 600; color: #495057; margin-bottom: 8px;">
+                        Page <span id="currentPageNum">1</span> of 5
+                    </div>
+                    <div class="page-dots" id="pageDots"></div>
+                </div>
+
+                <div id="assessmentPages"></div>
+
+                <div class="sticky-footer">
+                    <div class="button-group">
+                        <button class="btn-secondary" id="prevPageBtn" onclick="changePage(-1)">Previous</button>
+                        <button class="btn-secondary" onclick="goToStep('info')">Back to Info</button>
+                        <button class="btn-primary" id="nextPageBtn" onclick="changePage(1)">Next Page</button>
+                        <button class="btn-success" id="viewResultsBtn" onclick="goToStep('results')" style="display: none;">View Results</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Results -->
+            <div class="step" id="step-results">
+                <h2>Assessment Results</h2>
+                
+                <div class="results-summary" id="participantSummary"></div>
+
+                <h3>Function Scores</h3>
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>Function</th>
+                            <th style="text-align: center;">Score (out of 15)</th>
+                            <th style="text-align: center;">Percentage</th>
+                            <th style="text-align: center;">Interpretation</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsTableBody"></tbody>
+                </table>
+
+                <h3>Visual Analysis</h3>
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <div class="chart-title">Radar Chart - Function Profile</div>
+                        <canvas id="radarChart" height="300"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-title">Bar Chart - Score Distribution</div>
+                        <canvas id="barChart" height="300"></canvas>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <h3>Interpretation Guide</h3>
+                    <ul>
+                        <li><strong>High (≥66.7%):</strong> Strong indication this function maintains the behaviour</li>
+                        <li><strong>Moderate (33.3-66.6%):</strong> Possible contributing function</li>
+                        <li><strong>Low (&lt;33.3%):</strong> Unlikely to be maintaining the behaviour</li>
+                    </ul>
+                    <p style="margin-top: 16px; font-size: 14px; font-style: italic;">
+                        <strong>Radar Chart Interpretation:</strong> The "shape" of the radar chart shows whether behavior is singly maintained (one dominant peak) or multiply maintained (multiple elevated scores). This helps guide multi-component intervention strategies.
+                    </p>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="goToStep('assessment')">Review Responses</button>
+                    <button class="btn-export" onclick="exportToCSV()">Export to CSV</button>
+                    <button class="btn-export" onclick="emailResults()">Email Results</button>
+                    <button class="btn-primary" onclick="window.print()">Print / Save PDF</button>
+                    <button class="btn-new" onclick="startNewAssessment()">New Assessment</button>
+                </div>
+
+                <div class="reference-text">
+                    Reference: Paclawskyj, T.R., Matson, J.L., Rush, K.S., Smalls, Y., & Vollmer, T.R. (2000). 
+                    Questions About Behavioral Function (QABF): A behavior checklist for functional assessment of aberrant behavior. 
+                    Research in Developmental Disabilities, 21, 223-229.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Official QABF items with function assignments
+        const qabfItems = [
+            { id: 1, text: "Engages in the behavior to get attention.", function: 'Attention' },
+            { id: 2, text: "Engages in the behavior to escape work or learning situations.", function: 'Escape' },
+            { id: 3, text: "Engages in the behavior as a form of \"self-stimulation\".", function: 'Non-Social' },
+            { id: 4, text: "Engages in the behavior because he/she is in pain.", function: 'Physical' },
+            { id: 5, text: "Engages in the behavior to get access to items such as preferred toys, food, or beverages.", function: 'Tangible' },
+            { id: 6, text: "Engages in the behavior because he/she likes to be reprimanded.", function: 'Attention' },
+            { id: 7, text: "Engages in the behavior when asked to do something (get dressed, brush teeth, work, etc.)", function: 'Escape' },
+            { id: 8, text: "Engages in the behavior even if he/she thinks no one is in the room.", function: 'Non-Social' },
+            { id: 9, text: "Engages in the behavior more frequently when he/she is ill.", function: 'Physical' },
+            { id: 10, text: "Engages in the behavior when you take something away from him/her.", function: 'Tangible' },
+            { id: 11, text: "Engages in the behavior to draw attention to him/herself.", function: 'Attention' },
+            { id: 12, text: "Engages in the behavior when he/she does not want to do something.", function: 'Escape' },
+            { id: 13, text: "Engages in the behavior because there is nothing else to do.", function: 'Non-Social' },
+            { id: 14, text: "Engages in the behavior when there is something bothering him/her physically.", function: 'Physical' },
+            { id: 15, text: "Engages in the behavior when you have something that he/she wants.", function: 'Tangible' },
+            { id: 16, text: "Engages in the behavior to try to get a reaction from you.", function: 'Attention' },
+            { id: 17, text: "Engages in the behavior to try to get people to leave him/her alone.", function: 'Escape' },
+            { id: 18, text: "Engages in the behavior in a highly repetitive manner, ignoring his/her surroundings.", function: 'Non-Social' },
+            { id: 19, text: "Engages in the behavior because he/she is physically uncomfortable.", function: 'Physical' },
+            { id: 20, text: "Engages in the behavior when a peer has something that he/she wants.", function: 'Tangible' },
+            { id: 21, text: "Does he/she seem to be saying, \"come see me\" or \"look at me\" when engaging in the behavior?", function: 'Attention' },
+            { id: 22, text: "Does he/she seem to be saying \"leave me alone\" or \"stop asking me to do this\" when engaging in the behavior?", function: 'Escape' },
+            { id: 23, text: "Does he/she seem to enjoy the behavior, even if no one is around?", function: 'Non-Social' },
+            { id: 24, text: "Does the behavior seem to indicate to you that he/she is not feeling well?", function: 'Physical' },
+            { id: 25, text: "Does he/she seem to be saying, \"give me that (toy, food, item)\" when engaging in the behavior?", function: 'Tangible' }
+        ];
+
+        const ratingOptions = [
+            { value: 0, label: 'Never', description: 'Never occurs' },
+            { value: 1, label: 'Rarely', description: '1-25% of time' },
+            { value: 2, label: 'Some', description: '26-75% of time' },
+            { value: 3, label: 'Often', description: '76-100% of time' }
+        ];
+
+        const functionColors = {
+            'Attention': '#3B82F6',
+            'Escape': '#EF4444',
+            'Non-Social': '#8B5CF6',
+            'Physical': '#F59E0B',
+            'Tangible': '#10B981'
+        };
+
+        let responses = {};
+        let participantData = {};
+        let currentPage = 0;
+        const itemsPerPage = 5;
+        const totalPages = Math.ceil(qabfItems.length / itemsPerPage);
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('assessmentDate').value = today;
+            setupFormValidation();
+            renderPagination();
+            loadFromLocalStorage();
+        });
+
+        // Local Storage Functions
+        function saveToLocalStorage() {
+            const assessmentData = {
+                responses: responses,
+                participantData: participantData,
+                timestamp: new Date().toISOString()
+            };
+            localStorage.setItem('qabf_draft', JSON.stringify(assessmentData));
+        }
+
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('qabf_draft');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    // Check if draft is less than 7 days old
+                    const draftAge = (Date.now() - new Date(data.timestamp)) / (1000 * 60 * 60 * 24);
+                    if (draftAge < 7) {
+                        // Draft exists and is recent
+                        return data;
+                    }
+                }
+                catch (e) {
+                    console.error('Error loading draft:', e);
+                }
+            }
+            return null;
+        }
+
+        function checkDraftAssessment() {
+            const draft = loadFromLocalStorage();
+            if (draft && Object.keys(draft.responses).length > 0) {
+                if (confirm('You have an unfinished assessment from ' + new Date(draft.timestamp).toLocaleDateString() + '. Would you like to resume?')) {
+                    responses = draft.responses;
+                    participantData = draft.participantData;
+                    
+                    // Restore form fields
+                    if (participantData.name) document.getElementById('participantName').value = participantData.name;
+                    if (participantData.targetBehavior) document.getElementById('targetBehavior').value = participantData.targetBehavior;
+                    if (participantData.behaviorDescription) document.getElementById('behaviorDescription').value = participantData.behaviorDescription;
+                    if (participantData.ndisNumber) document.getElementById('ndisNumber').value = participantData.ndisNumber;
+                    if (participantData.date) document.getElementById('assessmentDate').value = participantData.date;
+                    if (participantData.informantName) document.getElementById('informantName').value = participantData.informantName;
+                    if (participantData.informantRole) document.getElementById('informantRole').value = participantData.informantRole;
+                    if (participantData.location) document.getElementById('location').value = participantData.location;
+                    if (participantData.completedBy) document.getElementById('completedBy').value = participantData.completedBy;
+                    if (participantData.practitionerEmail) document.getElementById('practitionerEmail').value = participantData.practitionerEmail;
+                    
+                    goToStep('assessment');
+                    updateAllItemDisplays();
+                    updateProgress();
+                } else {
+                    clearDraft();
+                    goToStep('info');
+                }
+            } else {
+                goToStep('info');
+            }
+        }
+
+        function clearDraft() {
+            localStorage.removeItem('qabf_draft');
+        }
+
+        function setupFormValidation() {
+            const inputs = ['participantName', 'targetBehavior', 'informantName', 'informantRole', 'location', 'completedBy'];
+            inputs.forEach(id => {
+                document.getElementById(id).addEventListener('input', validateInfoForm);
+            });
+        }
+
+        function validateInfoForm() {
+            const name = document.getElementById('participantName').value.trim();
+            const behavior = document.getElementById('targetBehavior').value.trim();
+            const informantName = document.getElementById('informantName').value.trim();
+            const informantRole = document.getElementById('informantRole').value.trim();
+            const location = document.getElementById('location').value.trim();
+            const completedBy = document.getElementById('completedBy').value.trim();
+            const btn = document.getElementById('continueToAssessment');
+            
+            if (name && behavior && informantName && informantRole && location && completedBy) {
+                btn.disabled = false;
+            } else {
+                btn.disabled = true;
+            }
+        }
+
+        function renderPagination() {
+            const pagesContainer = document.getElementById('assessmentPages');
+            const dotsContainer = document.getElementById('pageDots');
+            pagesContainer.innerHTML = '';
+            dotsContainer.innerHTML = '';
+
+            for (let page = 0; page < totalPages; page++) {
+                // Create page
+                const pageDiv = document.createElement('div');
+                pageDiv.className = 'assessment-page';
+                pageDiv.id = `page-${page}`;
+                if (page === 0) pageDiv.classList.add('active');
+
+                const startIdx = page * itemsPerPage;
+                const endIdx = Math.min(startIdx + itemsPerPage, qabfItems.length);
+                const pageItems = qabfItems.slice(startIdx, endIdx);
+
+                pageItems.forEach(item => {
+                    const itemDiv = createItemElement(item, page + 1);
+                    pageDiv.appendChild(itemDiv);
+                });
+
+                pagesContainer.appendChild(pageDiv);
+
+                // Create page dot
+                const dot = document.createElement('div');
+                dot.className = 'page-dot';
+                if (page === 0) dot.classList.add('active');
+                dotsContainer.appendChild(dot);
+            }
+
+            updatePageNavigation();
+        }
+
+        function createItemElement(item, chunk) {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'assessment-item';
+            itemDiv.id = `item-${item.id}`;
+            itemDiv.setAttribute('data-chunk', chunk);
+
+            const badge = document.createElement('div');
+            badge.className = 'item-badge';
+            badge.textContent = `Item ${item.id} of 25`;
+
+            const text = document.createElement('div');
+            text.className = 'item-text';
+            text.textContent = item.text;
+
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'rating-options';
+
+            ratingOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'rating-button';
+                button.onclick = () => selectRating(item.id, option.value);
+                
+                const label = document.createElement('div');
+                label.textContent = `${option.value} - ${option.label}`;
+                
+                const desc = document.createElement('div');
+                desc.className = 'rating-description';
+                desc.textContent = option.description;
+                
+                button.appendChild(label);
+                button.appendChild(desc);
+                optionsDiv.appendChild(button);
+            });
+
+            itemDiv.appendChild(badge);
+            itemDiv.appendChild(text);
+            itemDiv.appendChild(optionsDiv);
+            
+            return itemDiv;
+        }
+
+        function selectRating(itemId, value) {
+            responses[itemId] = value;
+            updateItemDisplay(itemId);
+            updateProgress();
+            updatePageDots();
+            checkCompletion();
+            saveToLocalStorage();
+        }
+
+        function updateItemDisplay(itemId) {
+            const itemDiv = document.getElementById(`item-${itemId}`);
+            if (!itemDiv) return;
+            
+            const buttons = itemDiv.querySelectorAll('.rating-button');
+            
+            itemDiv.classList.add('completed');
+            
+            buttons.forEach((btn, index) => {
+                if (ratingOptions[index].value === responses[itemId]) {
+                    btn.classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
+        }
+
+        function updateAllItemDisplays() {
+            Object.keys(responses).forEach(itemId => {
+                updateItemDisplay(parseInt(itemId));
+            });
+            updatePageDots();
+        }
+
+        function updateProgress() {
+            const completed = Object.keys(responses).length;
+            const percentage = (completed / 25) * 100;
+            
+            document.getElementById('progressText').textContent = `${completed} of 25 completed`;
+            document.getElementById('progressFill').style.width = `${percentage}%`;
+        }
+
+        function updatePageDots() {
+            const dots = document.querySelectorAll('.page-dot');
+            dots.forEach((dot, index) => {
+                const pageStart = index * itemsPerPage + 1;
+                const pageEnd = Math.min(pageStart + itemsPerPage - 1, 25);
+                
+                // Check if all items on this page are completed
+                let allCompleted = true;
+                for (let i = pageStart; i <= pageEnd; i++) {
+                    if (responses[i] === undefined) {
+                        allCompleted = false;
+                        break;
+                    }
+                }
+                
+                if (allCompleted) {
+                    dot.classList.add('completed');
+                } else {
+                    dot.classList.remove('completed');
+                }
+                
+                if (index === currentPage) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        }
+
+        function changePage(direction) {
+            const newPage = currentPage + direction;
+            if (newPage < 0 || newPage >= totalPages) return;
+            
+            // Hide current page
+            document.getElementById(`page-${currentPage}`).classList.remove('active');
+            
+            // Show new page
+            currentPage = newPage;
+            document.getElementById(`page-${currentPage}`).classList.add('active');
+            
+            // Update page indicator
+            document.getElementById('currentPageNum').textContent = currentPage + 1;
+            
+            updatePageDots();
+            updatePageNavigation();
+            
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+
+        function updatePageNavigation() {
+            const prevBtn = document.getElementById('prevPageBtn');
+            const nextBtn = document.getElementById('nextPageBtn');
+            const resultsBtn = document.getElementById('viewResultsBtn');
+            
+            prevBtn.disabled = currentPage === 0;
+            
+            if (currentPage === totalPages - 1) {
+                nextBtn.style.display = 'none';
+                resultsBtn.style.display = 'block';
+            } else {
+                nextBtn.style.display = 'block';
+                resultsBtn.style.display = 'none';
+            }
+        }
+
+        function checkCompletion() {
+            const btn = document.getElementById('viewResultsBtn');
+            const completed = Object.keys(responses).length;
+            
+            if (completed === 25) {
+                btn.disabled = false;
+                btn.textContent = 'View Results';
+            } else {
+                btn.disabled = true;
+                btn.textContent = `Complete ${25 - completed} More Items`;
+            }
+        }
+
+        function goToStep(stepName) {
+            // Hide all steps
+            document.querySelectorAll('.step').forEach(step => {
+                step.classList.remove('active');
+            });
+
+            // Show target step
+            document.getElementById(`step-${stepName}`).classList.add('active');
+
+            // Handle progress bar
+            if (stepName === 'assessment') {
+                document.getElementById('progressBar').classList.add('active');
+                saveParticipantData();
+                renderPagination();
+                updateAllItemDisplays();
+                updateProgress();
+            } else {
+                document.getElementById('progressBar').classList.remove('active');
+            }
+
+            // Handle results
+            if (stepName === 'results') {
+                generateResults();
+            }
+
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+
+        function saveParticipantData() {
+            participantData = {
+                name: document.getElementById('participantName').value,
+                targetBehavior: document.getElementById('targetBehavior').value,
+                behaviorDescription: document.getElementById('behaviorDescription').value,
+                ndisNumber: document.getElementById('ndisNumber').value,
+                date: document.getElementById('assessmentDate').value,
+                informantName: document.getElementById('informantName').value,
+                informantRole: document.getElementById('informantRole').value,
+                location: document.getElementById('location').value,
+                completedBy: document.getElementById('completedBy').value,
+                practitionerEmail: document.getElementById('practitionerEmail').value
+            };
+            saveToLocalStorage();
+        }
+
+        function calculateResults() {
+            const functions = ['Attention', 'Escape', 'Non-Social', 'Physical', 'Tangible'];
+            const results = {};
+
+            functions.forEach(func => {
+                const funcItems = qabfItems.filter(item => item.function === func);
+                const score = funcItems.reduce((sum, item) => {
+                    return sum + (responses[item.id] || 0);
+                }, 0);
+
+                const maxScore = 15;
+                const percentage = (score / maxScore) * 100;
+
+                let interpretation = 'Low';
+                if (percentage >= 66.7) interpretation = 'High';
+                else if (percentage >= 33.3) interpretation = 'Moderate';
+
+                results[func] = {
+                    score,
+                    percentage: percentage.toFixed(1),
+                    interpretation
+                };
+            });
+
+            return results;
+        }
+
+        function generateResults() {
+            const results = calculateResults();
+
+            // Update participant summary
+            const summary = document.getElementById('participantSummary');
+            summary.innerHTML = `
+                <strong>Participant:</strong> ${participantData.name}<br>
+                ${participantData.ndisNumber ? '<strong>NDIS Number:</strong> ' + participantData.ndisNumber + '<br>' : ''}
+                <strong>Target Behavior:</strong> ${participantData.targetBehavior}<br>
+                ${participantData.behaviorDescription ? '<strong>Description:</strong> ' + participantData.behaviorDescription + '<br>' : ''}
+                <strong>Date:</strong> ${participantData.date}<br>
+                <strong>Location:</strong> ${participantData.location}<br>
+                <strong>Informant:</strong> ${participantData.informantName} (${participantData.informantRole})<br>
+                <strong>Practitioner:</strong> ${participantData.completedBy}
+            `;
+
+            // Update results table
+            const tbody = document.getElementById('resultsTableBody');
+            tbody.innerHTML = '';
+
+            Object.keys(results).forEach(func => {
+                const tr = document.createElement('tr');
+                const interpretClass = `interpretation-${results[func].interpretation.toLowerCase()}`;
+                
+                tr.innerHTML = `
+                    <td style="font-weight: 600; color: ${functionColors[func]}">${func}</td>
+                    <td style="text-align: center; font-weight: 600;">${results[func].score}</td>
+                    <td style="text-align: center;">${results[func].percentage}%</td>
+                    <td style="text-align: center;">
+                        <span class="interpretation-badge ${interpretClass}">
+                            ${results[func].interpretation}
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Generate charts
+            generateRadarChart(results);
+            generateBarChart(results);
+        }
+
+        function generateRadarChart(results) {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (window.radarChartInstance) {
+                window.radarChartInstance.destroy();
+            }
+
+            const data = {
+                labels: Object.keys(results),
+                datasets: [{
+                    label: 'Function Scores',
+                    data: Object.values(results).map(r => parseFloat(r.percentage)),
+                    backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                    borderColor: 'rgba(102, 126, 234, 1)',
+                    borderWidth: 2,
+                    pointBackgroundColor: Object.keys(results).map(func => functionColors[func]),
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6
+                }]
+            };
+
+            window.radarChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                stepSize: 20
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function generateBarChart(results) {
+            const ctx = document.getElementById('barChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (window.barChartInstance) {
+                window.barChartInstance.destroy();
+            }
+
+            const data = {
+                labels: Object.keys(results),
+                datasets: [{
+                    label: 'Score (out of 15)',
+                    data: Object.values(results).map(r => r.score),
+                    backgroundColor: Object.keys(results).map(func => functionColors[func]),
+                    borderColor: Object.keys(results).map(func => functionColors[func]),
+                    borderWidth: 1
+                }]
+            };
+
+            window.barChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 15,
+                            ticks: {
+                                stepSize: 3
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function exportToCSV() {
+            const results = calculateResults();
+            
+            // Create CSV content
+            let csv = 'QABF Assessment Results\n\n';
+            csv += 'Participant Information\n';
+            csv += `Participant Name,${participantData.name}\n`;
+            csv += `Target Behavior,${participantData.targetBehavior}\n`;
+            if (participantData.behaviorDescription) {
+                csv += `Behavior Description,"${participantData.behaviorDescription}"\n`;
+            }
+            csv += `NDIS Number,${participantData.ndisNumber || 'N/A'}\n`;
+            csv += `Assessment Date,${participantData.date}\n`;
+            csv += `Completed By,${participantData.completedBy}\n\n`;
+            
+            csv += 'Function Scores\n';
+            csv += 'Function,Score (out of 15),Percentage,Interpretation\n';
+            Object.keys(results).forEach(func => {
+                csv += `${func},${results[func].score},${results[func].percentage}%,${results[func].interpretation}\n`;
+            });
+            
+            csv += '\nItem Responses\n';
+            csv += 'Item,Question,Response,Score\n';
+            qabfItems.forEach(item => {
+                const score = responses[item.id] || 0;
+                const rating = ratingOptions.find(r => r.value === score);
+                csv += `${item.id},"${item.text}",${rating ? rating.label : 'Not Rated'},${score}\n`;
+            });
+            
+            // Create download link
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `QABF_${participantData.name.replace(/\s+/g, '_')}_${participantData.date}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        async function emailResults() {
+            const results = calculateResults();
+            
+            // Show loading message
+            const originalText = event.target.textContent;
+            event.target.textContent = 'Generating PDF...';
+            event.target.disabled = true;
+            
+            try {
+                // Create PDF using jsPDF
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                
+                const pageWidth = pdf.internal.pageSize.getWidth();
+                const pageHeight = pdf.internal.pageSize.getHeight();
+                const margin = 20;
+                let yPos = margin;
+                
+                // Header - CONFIDENTIAL
+                pdf.setFillColor(160, 167, 149); // Brand color
+                pdf.rect(0, 0, pageWidth, 35, 'F');
+                pdf.setTextColor(255, 255, 255);
+                pdf.setFontSize(8);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text('CONFIDENTIAL', margin, 12);
+                pdf.setFontSize(18);
+                pdf.text('QABF Assessment Results', margin, 22);
+                pdf.setFontSize(10);
+                pdf.setFont('helvetica', 'normal');
+                pdf.text('Questions About Behavioral Function', margin, 29);
+                
+                yPos = 45;
+                pdf.setTextColor(0, 0, 0);
+                
+                // Participant Information Section
+                pdf.setFontSize(12);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text('Participant Information', margin, yPos);
+                yPos += 8;
+                
+                pdf.setFontSize(10);
+                pdf.setFont('helvetica', 'normal');
+                const info = [
+                    `Participant: ${participantData.name}`,
+                    participantData.ndisNumber ? `NDIS Number: ${participantData.ndisNumber}` : null,
+                    `Target Behavior: ${participantData.targetBehavior}`,
+                    participantData.behaviorDescription ? `Description: ${participantData.behaviorDescription}` : null,
+                    `Date: ${participantData.date}`,
+                    `Location: ${participantData.location}`,
+                    `Informant: ${participantData.informantName} (${participantData.informantRole})`,
+                    `Practitioner: ${participantData.completedBy}`
+                ].filter(item => item !== null);
+                
+                info.forEach(line => {
+                    const splitText = pdf.splitTextToSize(line, pageWidth - 2 * margin);
+                    splitText.forEach(textLine => {
+                        pdf.text(textLine, margin, yPos);
+                        yPos += 5;
+                    });
+                });
+                
+                yPos += 5;
+                
+                // Function Scores Table
+                pdf.setFontSize(12);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text('Function Scores', margin, yPos);
+                yPos += 8;
+                
+                // Table header
+                pdf.setFillColor(160, 167, 149);
+                pdf.setTextColor(255, 255, 255);
+                pdf.rect(margin, yPos - 5, pageWidth - 2 * margin, 8, 'F');
+                pdf.setFontSize(9);
+                pdf.text('Function', margin + 3, yPos);
+                pdf.text('Score', margin + 50, yPos);
+                pdf.text('Percentage', margin + 80, yPos);
+                pdf.text('Interpretation', margin + 120, yPos);
+                yPos += 8;
+                
+                // Table rows
+                pdf.setTextColor(0, 0, 0);
+                pdf.setFont('helvetica', 'normal');
+                let rowCount = 0;
+                Object.keys(results).forEach(func => {
+                    if (rowCount % 2 === 0) {
+                        pdf.setFillColor(248, 249, 250);
+                        pdf.rect(margin, yPos - 5, pageWidth - 2 * margin, 7, 'F');
+                    }
+                    pdf.text(func, margin + 3, yPos);
+                    pdf.text(`${results[func].score}/15`, margin + 50, yPos);
+                    pdf.text(`${results[func].percentage}%`, margin + 80, yPos);
+                    pdf.text(results[func].interpretation, margin + 120, yPos);
+                    yPos += 7;
+                    rowCount++;
+                });
+                
+                yPos += 10;
+                
+                // Capture charts as images
+                const radarCanvas = document.getElementById('radarChart');
+                const barCanvas = document.getElementById('barChart');
+                
+                if (radarCanvas && barCanvas) {
+                    // Radar Chart
+                    const radarImg = radarCanvas.toDataURL('image/png');
+                    pdf.setFontSize(11);
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.text('Function Profile - Radar Chart', margin, yPos);
+                    yPos += 7;
+                    const chartWidth = 80;
+                    const chartHeight = 60;
+                    pdf.addImage(radarImg, 'PNG', margin, yPos, chartWidth, chartHeight);
+                    
+                    // Bar Chart
+                    const barImg = barCanvas.toDataURL('image/png');
+                    pdf.text('Score Distribution - Bar Chart', margin + chartWidth + 10, yPos - 7);
+                    pdf.addImage(barImg, 'PNG', margin + chartWidth + 10, yPos, chartWidth, chartHeight);
+                    
+                    yPos += chartHeight + 10;
+                }
+                
+                // Interpretation Guide
+                if (yPos > pageHeight - 50) {
+                    pdf.addPage();
+                    yPos = margin;
+                }
+                
+                pdf.setFillColor(244, 245, 243);
+                const guideHeight = 35;
+                pdf.rect(margin, yPos, pageWidth - 2 * margin, guideHeight, 'F');
+                
+                yPos += 7;
+                pdf.setFontSize(11);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text('Interpretation Guide', margin + 3, yPos);
+                yPos += 7;
+                
+                pdf.setFontSize(9);
+                pdf.setFont('helvetica', 'normal');
+                pdf.text('• High (≥66.7%): Strong indication this function maintains the behaviour', margin + 3, yPos);
+                yPos += 5;
+                pdf.text('• Moderate (33.3-66.6%): Possible contributing function', margin + 3, yPos);
+                yPos += 5;
+                pdf.text('• Low (<33.3%): Unlikely to be maintaining the behaviour', margin + 3, yPos);
+                yPos += 7;
+                
+                const noteText = 'Note: Multiple functions can maintain behaviour. Use the highest-scoring functions to guide intervention planning.';
+                const splitNote = pdf.splitTextToSize(noteText, pageWidth - 2 * margin - 6);
+                pdf.setFont('helvetica', 'italic');
+                splitNote.forEach(line => {
+                    pdf.text(line, margin + 3, yPos);
+                    yPos += 5;
+                });
+                
+                // Reference at bottom
+                yPos = pageHeight - 20;
+                pdf.setFontSize(8);
+                pdf.setFont('helvetica', 'italic');
+                const refText = 'Reference: Paclawskyj, T.R., Matson, J.L., Rush, K.S., Smalls, Y., & Vollmer, T.R. (2000). Questions About Behavioral Function (QABF): A behavior checklist for functional assessment of aberrant behavior. Research in Developmental Disabilities, 21, 223-229.';
+                const splitRef = pdf.splitTextToSize(refText, pageWidth - 2 * margin);
+                splitRef.forEach(line => {
+                    pdf.text(line, margin, yPos);
+                    yPos += 4;
+                });
+                
+                // Convert PDF to blob
+                const pdfBlob = pdf.output('blob');
+                
+                // Create a temporary download link to get the PDF file
+                const pdfUrl = URL.createObjectURL(pdfBlob);
+                const downloadLink = document.createElement('a');
+                downloadLink.href = pdfUrl;
+                const fileName = `QABF_${participantData.name.replace(/\s+/g, '_')}_${participantData.date}.pdf`;
+                downloadLink.download = fileName;
+                
+                // Trigger download
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                
+                // Small delay to ensure download starts
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Now open email with instructions
+                const recipient = participantData.practitionerEmail || '';
+                const subject = `QABF Assessment Results - ${participantData.name} - ${participantData.date}`;
+                const body = `Please find attached the QABF Assessment Results.\n\nParticipant: ${participantData.name}\nTarget Behavior: ${participantData.targetBehavior}\nDate: ${participantData.date}\n\nThe PDF report "${fileName}" has been downloaded to your device. Please attach it to this email before sending.\n\nNote: Due to browser security restrictions, the PDF cannot be automatically attached. You will need to manually attach the downloaded file.`;
+                
+                const mailtoLink = `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                window.location.href = mailtoLink;
+                
+                // Clean up
+                URL.revokeObjectURL(pdfUrl);
+                
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                alert('Error generating PDF. Please try using the Print/Save PDF button instead.');
+            } finally {
+                event.target.textContent = originalText;
+                event.target.disabled = false;
+            }
+        }
+
+        function startNewAssessment() {
+            if (confirm('Are you sure you want to start a new assessment? Current data will be lost unless you export it first.')) {
+                responses = {};
+                participantData = {};
+                currentPage = 0;
+                
+                document.getElementById('participantName').value = '';
+                document.getElementById('targetBehavior').value = '';
+                document.getElementById('behaviorDescription').value = '';
+                document.getElementById('ndisNumber').value = '';
+                document.getElementById('assessmentDate').value = new Date().toISOString().split('T')[0];
+                document.getElementById('informantName').value = '';
+                document.getElementById('informantRole').value = '';
+                document.getElementById('location').value = '';
+                document.getElementById('completedBy').value = '';
+                document.getElementById('practitionerEmail').value = '';
+                
+                clearDraft();
+                goToStep('intro');
+            }
+        }
+    </script>
+</body>
+</html>
