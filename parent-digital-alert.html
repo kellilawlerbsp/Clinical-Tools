@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parent Digital Safety Alert</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --cream: #F5F0E8;
+    --sand: #D9C9A8;
+    --bark: #5C4A32;
+    --tide: #3A6B6E;
+    --shore: #8BA89C;
+    --drift: #B5C4C1;
+    --alert-red: #C0392B;
+    --alert-amber: #E67E22;
+    --alert-green: #2E7D5E;
+    --text: #2C2417;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    background-image: 
+      radial-gradient(ellipse at 10% 20%, rgba(58,107,110,0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 90% 80%, rgba(181,196,193,0.15) 0%, transparent 50%);
+  }
+
+  .app {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    padding: 2.5rem 0 2rem;
+    border-bottom: 1px solid var(--sand);
+    margin-bottom: 2.5rem;
+  }
+
+  .header-eyebrow {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--tide);
+    font-weight: 500;
+    margin-bottom: 0.6rem;
+  }
+
+  .header h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 300;
+    color: var(--bark);
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+
+  .header h1 em {
+    font-style: italic;
+    color: var(--tide);
+  }
+
+  .header-sub {
+    font-size: 0.85rem;
+    color: var(--shore);
+    max-width: 420px;
+    margin: 0.6rem auto 0;
+    line-height: 1.5;
+  }
+
+  /* CONTROLS */
+  .controls {
+    background: white;
+    border: 1px solid var(--drift);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+  }
+
+  .control-group {
+    flex: 1;
+    min-width: 180px;
+  }
+
+  .control-group label {
+    display: block;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--shore);
+    font-weight: 500;
+    margin-bottom: 0.4rem;
+  }
+
+  .control-group select,
+  .control-group input[type="text"] {
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid var(--drift);
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    color: var(--text);
+    background: var(--cream);
+    appearance: none;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .control-group select:focus,
+  .control-group input:focus {
+    border-color: var(--tide);
+  }
+
+  .generate-btn {
+    padding: 0.6rem 1.4rem;
+    background: var(--tide);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    letter-spacing: 0.03em;
+    flex-shrink: 0;
+  }
+
+  .generate-btn:hover:not(:disabled) {
+    background: var(--bark);
+    transform: translateY(-1px);
+  }
+
+  .generate-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  /* OUTPUT AREA */
+  .output-area {
+    display: none;
+  }
+
+  .output-area.visible {
+    display: block;
+    animation: fadeUp 0.5s ease;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ALERT HEADER */
+  .alert-header {
+    background: var(--bark);
+    color: white;
+    border-radius: 10px 10px 0 0;
+    padding: 1.5rem 1.8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .alert-brand {
+    font-family: 'Fraunces', serif;
+    font-size: 1.1rem;
+    font-weight: 300;
+    letter-spacing: 0.02em;
+    opacity: 0.9;
+  }
+
+  .alert-meta {
+    text-align: right;
+    font-size: 0.75rem;
+    opacity: 0.7;
+    line-height: 1.6;
+  }
+
+  .alert-title {
+    width: 100%;
+    font-family: 'Fraunces', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    line-height: 1.2;
+    margin-top: 0.25rem;
+  }
+
+  /* ALERT BODY */
+  .alert-body {
+    background: white;
+    border: 1px solid var(--drift);
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+
+  .alert-intro {
+    padding: 1.2rem 1.8rem;
+    background: rgba(58,107,110,0.04);
+    border-bottom: 1px solid var(--drift);
+    font-size: 0.875rem;
+    line-height: 1.65;
+    color: var(--bark);
+    font-style: italic;
+  }
+
+  /* ALERT ITEMS */
+  .alert-item {
+    padding: 1.2rem 1.8rem;
+    border-bottom: 1px solid #f0ebe0;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1rem;
+    align-items: start;
+  }
+
+  .alert-item:last-child {
+    border-bottom: none;
+  }
+
+  .severity-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    min-width: 52px;
+  }
+
+  .severity-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-top: 4px;
+  }
+
+  .severity-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+    text-align: center;
+  }
+
+  .sev-high .severity-dot { background: var(--alert-red); }
+  .sev-high .severity-label { color: var(--alert-red); }
+  .sev-med .severity-dot { background: var(--alert-amber); }
+  .sev-med .severity-label { color: var(--alert-amber); }
+  .sev-low .severity-dot { background: var(--alert-green); }
+  .sev-low .severity-label { color: var(--alert-green); }
+
+  .item-content {}
+
+  .item-tag {
+    display: inline-block;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--tide);
+    background: rgba(58,107,110,0.08);
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    margin-bottom: 0.4rem;
+  }
+
+  .item-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--bark);
+    margin-bottom: 0.35rem;
+    line-height: 1.3;
+  }
+
+  .item-body {
+    font-size: 0.83rem;
+    line-height: 1.65;
+    color: #4a3d2c;
+    margin-bottom: 0.6rem;
+  }
+
+  .item-action {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--tide);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+    line-height: 1.5;
+  }
+
+  .item-action::before {
+    content: '→';
+    flex-shrink: 0;
+  }
+
+  /* FOOTER STRIP */
+  .alert-footer {
+    background: var(--cream);
+    border: 1px solid var(--drift);
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--shore);
+    margin-bottom: 1.5rem;
+  }
+
+  /* COPY BUTTON */
+  .action-row {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .copy-btn, .email-btn {
+    padding: 0.55rem 1.2rem;
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+
+  .copy-btn {
+    background: white;
+    border: 1px solid var(--drift);
+    color: var(--bark);
+  }
+
+  .copy-btn:hover { border-color: var(--bark); }
+
+  .email-btn {
+    background: var(--tide);
+    border: 1px solid var(--tide);
+    color: white;
+  }
+
+  .email-btn:hover { background: var(--bark); border-color: var(--bark); }
+
+  /* LOADING */
+  .loading {
+    display: none;
+    text-align: center;
+    padding: 3rem 1rem;
+  }
+
+  .loading.visible { display: block; }
+
+  .loading-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+  }
+
+  .loading-dots span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--tide);
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+
+  .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes pulse {
+    0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+    40% { opacity: 1; transform: scale(1); }
+  }
+
+  .loading-text {
+    font-family: 'Fraunces', serif;
+    font-size: 1rem;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--shore);
+  }
+
+  /* PLAIN TEXT */
+  .plain-text-area {
+    display: none;
+    background: #1a1a1a;
+    color: #e8e8e8;
+    border-radius: 8px;
+    padding: 1.2rem;
+    font-family: monospace;
+    font-size: 0.78rem;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    margin-bottom: 1.5rem;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .plain-text-area.visible { display: block; }
+
+  .toggle-plain {
+    background: none;
+    border: none;
+    color: var(--shore);
+    font-size: 0.75rem;
+    cursor: pointer;
+    text-decoration: underline;
+    font-family: 'DM Sans', sans-serif;
+    padding: 0;
+    margin-bottom: 0.75rem;
+    display: block;
+  }
+
+  /* AGE TAGS */
+  .age-tag {
+    display: inline-block;
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: rgba(92,74,50,0.08);
+    color: var(--bark);
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    margin-left: 0.35rem;
+  }
+
+  @media (max-width: 540px) {
+    .alert-header { padding: 1.2rem; }
+    .alert-item { padding: 1rem 1.2rem; }
+    .controls { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <div class="header-eyebrow">Driftwood Therapeutic Supports</div>
+    <h1>Weekly <em>Digital Safety</em> Alert</h1>
+    <p class="header-sub">Current risks, platform changes & conversation starters — curated for parents.</p>
+  </div>
+
+  <div class="controls">
+    <div class="control-group">
+      <label>Age group focus</label>
+      <select id="ageGroup">
+        <option value="all ages">All ages (primary + secondary)</option>
+        <option value="5–10 year olds">Primary school (5–10)</option>
+        <option value="11–14 year olds">Early secondary (11–14)</option>
+        <option value="15–18 year olds">Older teens (15–18)</option>
+      </select>
+    </div>
+    <div class="control-group">
+      <label>Focus area</label>
+      <select id="focusArea">
+        <option value="games, social media, and YouTube">Games + Social Media + YouTube</option>
+        <option value="online games and gaming platforms">Gaming platforms</option>
+        <option value="social media and messaging apps">Social media & messaging</option>
+        <option value="YouTube and streaming">YouTube & streaming</option>
+        <option value="AI tools and chatbots">AI tools & chatbots</option>
+      </select>
+    </div>
+    <div class="control-group" style="min-width:140px;max-width:160px;">
+      <label>Week of</label>
+      <input type="text" id="weekDate" placeholder="e.g. 28 April 2026">
+    </div>
+    <button class="generate-btn" id="generateBtn" onclick="generateAlert()">Generate Alert</button>
+  </div>
+
+  <div class="loading" id="loading">
+    <div class="loading-dots"><span></span><span></span><span></span></div>
+    <p class="loading-text">Preparing your alert…</p>
+  </div>
+
+  <div class="output-area" id="outputArea">
+    <div class="alert-header">
+      <div>
+        <div class="alert-brand">Driftwood Therapeutic Supports</div>
+        <div class="alert-title" id="alertTitle">Weekly Digital Safety Alert</div>
+      </div>
+      <div class="alert-meta" id="alertMeta">Week of —<br>For parents & carers</div>
+    </div>
+
+    <div class="alert-body">
+      <div class="alert-intro" id="alertIntro"></div>
+      <div id="alertItems"></div>
+    </div>
+
+    <div class="alert-footer">
+      <span>Compiled by Driftwood Therapeutic Supports | Kelli Lawler, ABSP</span>
+      <span>Not a substitute for individual clinical advice</span>
+    </div>
+
+    <div class="action-row">
+      <button class="copy-btn" onclick="copyPlainText()">📋 Copy as plain text</button>
+      <button class="toggle-plain" onclick="togglePlain()" id="togglePlainBtn">Show plain text version</button>
+    </div>
+
+    <div class="plain-text-area" id="plainText"></div>
+  </div>
+
+</div>
+
+<script>
+let lastPlainText = '';
+
+async function generateAlert() {
+  const ageGroup = document.getElementById('ageGroup').value;
+  const focusArea = document.getElementById('focusArea').value;
+  const weekDate = document.getElementById('weekDate').value || 'this week';
+
+  document.getElementById('generateBtn').disabled = true;
+  document.getElementById('loading').classList.add('visible');
+  document.getElementById('outputArea').classList.remove('visible');
+  document.getElementById('plainText').classList.remove('visible');
+  document.getElementById('togglePlainBtn').textContent = 'Show plain text version';
+
+  const prompt = `You are a digital safety researcher and parenting support specialist working for Driftwood Therapeutic Supports, a trauma-informed behaviour support practice in Australia.
+
+Generate a weekly parent alert about current digital safety concerns for ${ageGroup}, focused on ${focusArea}. Draw on your knowledge of recent platform changes, trending risks, and known concerns — be specific and concrete, not generic.
+
+You MUST return ONLY a raw JSON object. No preamble. No explanation. No markdown. Start your response with { and end with }. Nothing before or after.
+
+Required structure:
+{
+  "title": "Weekly Digital Safety Alert",
+  "subtitle": "short descriptor e.g. 'Gaming & Social Media Edition'",
+  "intro": "2-sentence warm but direct intro for parents",
+  "items": [
+    {
+      "type": "Game Update or Platform Change or Trend Alert or Content Warning or App Alert",
+      "title": "Name of platform or game or trend",
+      "age": "relevant age range e.g. 8+ or teens or all ages",
+      "severity": "high or medium or low",
+      "what": "2 sentences max: what it is and what the specific concern is",
+      "action": "1 sentence: specific actionable step for parents"
+    }
+  ],
+  "footer_tip": "One brief conversation starter sentence for parents to use this week"
+}
+
+Include exactly 4 items. Mix severity levels. Australian spelling. START WITH { NOW.`;
+
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 4000,
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+
+    const data = await response.json();
+
+    // Extract all text blocks (web search results + final response)
+    let rawText = '';
+    for (const block of data.content) {
+      if (block.type === 'text') rawText += block.text;
+    }
+
+    // Strip markdown fences
+    rawText = rawText.replace(/```json/g, '').replace(/```/g, '');
+
+    // Extract the JSON object — find the outermost { ... }
+    const jsonStart = rawText.indexOf('{');
+    const jsonEnd = rawText.lastIndexOf('}');
+    if (jsonStart === -1 || jsonEnd === -1) throw new Error('No JSON object found in response');
+    const jsonStr = rawText.slice(jsonStart, jsonEnd + 1);
+    const result = JSON.parse(jsonStr);
+
+    renderAlert(result, ageGroup, weekDate);
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById('loading').classList.remove('visible');
+    document.getElementById('generateBtn').disabled = false;
+    alert('Something went wrong generating the alert. Please try again.');
+  }
+}
+
+function severityClass(sev) {
+  if (!sev) return 'sev-low';
+  const s = sev.toLowerCase();
+  if (s === 'high') return 'sev-high';
+  if (s === 'medium' || s === 'med') return 'sev-med';
+  return 'sev-low';
+}
+
+function renderAlert(data, ageGroup, weekDate) {
+  document.getElementById('alertTitle').textContent = `${data.title}${data.subtitle ? ' — ' + data.subtitle : ''}`;
+  document.getElementById('alertMeta').innerHTML = `Week of ${weekDate}<br>For parents & carers | ${ageGroup}`;
+  document.getElementById('alertIntro').textContent = data.intro;
+
+  const itemsEl = document.getElementById('alertItems');
+  itemsEl.innerHTML = '';
+
+  (data.items || []).forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'alert-item';
+    const sevClass = severityClass(item.severity);
+    div.innerHTML = `
+      <div class="severity-badge ${sevClass}">
+        <div class="severity-dot"></div>
+        <div class="severity-label">${item.severity || 'Info'}</div>
+      </div>
+      <div class="item-content">
+        <div>
+          <span class="item-tag">${item.type || 'Alert'}</span>
+          <span class="age-tag">${item.age || ''}</span>
+        </div>
+        <div class="item-title">${item.title}</div>
+        <div class="item-body">${item.what}</div>
+        <div class="item-action">${item.action}</div>
+      </div>
+    `;
+    itemsEl.appendChild(div);
+  });
+
+  // Add footer tip as final item
+  if (data.footer_tip) {
+    const tipDiv = document.createElement('div');
+    tipDiv.style.cssText = 'padding:1rem 1.8rem;background:rgba(58,107,110,0.04);border-top:1px solid #f0ebe0;font-size:0.82rem;color:#3A6B6E;font-style:italic;line-height:1.6;';
+    tipDiv.innerHTML = `<strong style="font-style:normal;font-weight:500;">💬 This week's conversation starter:</strong> ${data.footer_tip}`;
+    itemsEl.appendChild(tipDiv);
+  }
+
+  lastPlainText = generateFallbackPlain(data, weekDate, ageGroup);
+  document.getElementById('plainText').textContent = lastPlainText;
+
+  document.getElementById('loading').classList.remove('visible');
+  document.getElementById('outputArea').classList.add('visible');
+  document.getElementById('generateBtn').disabled = false;
+}
+
+function generateFallbackPlain(data, weekDate, ageGroup) {
+  let out = `DRIFTWOOD THERAPEUTIC SUPPORTS\nWeekly Digital Safety Alert\nWeek of ${weekDate} | ${ageGroup}\n\n${data.intro}\n\n`;
+  (data.items || []).forEach((item, i) => {
+    out += `${i+1}. [${item.severity?.toUpperCase() || 'INFO'}] ${item.title} (${item.type})\n${item.what}\nWhat to do: ${item.action}\n\n`;
+  });
+  if (data.footer_tip) out += `CONVERSATION STARTER THIS WEEK:\n${data.footer_tip}\n\n`;
+  out += `Compiled by Kelli Lawler, ABSP — Driftwood Therapeutic Supports\nNot a substitute for individual clinical advice.`;
+  return out;
+}
+
+function togglePlain() {
+  const el = document.getElementById('plainText');
+  const btn = document.getElementById('togglePlainBtn');
+  if (el.classList.contains('visible')) {
+    el.classList.remove('visible');
+    btn.textContent = 'Show plain text version';
+  } else {
+    el.classList.add('visible');
+    btn.textContent = 'Hide plain text version';
+  }
+}
+
+function copyPlainText() {
+  if (!lastPlainText) return;
+  navigator.clipboard.writeText(lastPlainText).then(() => {
+    const btn = event.target;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = '📋 Copy as plain text', 2000);
+  });
+}
+
+// Set default week date
+const d = new Date();
+document.getElementById('weekDate').value = d.toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
+</script>
+</body>
+</html>
